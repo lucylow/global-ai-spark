@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# OpenxAI Global Accelerator 2025
 
 ## Project info
 
