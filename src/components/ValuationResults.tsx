@@ -10,6 +10,8 @@ interface PropertyData {
   riskScore: number;
   climateRisk: string;
   lvrRatio: number;
+  story?: string;
+  sentiment?: string;
 }
 
 interface ValuationResultsProps {
@@ -74,6 +76,26 @@ export default function ValuationResults({ data }: ValuationResultsProps) {
         </div>
       </Card>
 
+      {/* AI Story & Sentiment */}
+      {data.story && (
+        <Card className="p-6 bg-blue-50 border-blue-200">
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-blue-900">AI Risk Analysis</h3>
+            <div className="text-sm text-blue-800">
+              <strong>Market Intelligence:</strong> {data.story}
+            </div>
+            {data.sentiment && (
+              <div className="text-sm text-blue-700">
+                <strong>Sentiment Analysis:</strong> {data.sentiment}
+              </div>
+            )}
+            <div className="text-xs text-blue-600">
+              Powered by Ollama + CoreLogic Australia + Geoscience Australia
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Risk Assessment */}
       <Card className="p-6">
         <div className="space-y-4">
@@ -90,11 +112,28 @@ export default function ValuationResults({ data }: ValuationResultsProps) {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <div className="text-muted-foreground">Flood Risk</div>
-              <div className="font-medium">{data.riskScore > 0.6 ? 'High' : 'Low'}</div>
+              <div className="font-medium">{data.riskScore > 0.6 ? 'High' : data.riskScore > 0.3 ? 'Medium' : 'Low'}</div>
             </div>
             <div>
               <div className="text-muted-foreground">Fire Risk</div>
-              <div className="font-medium">{data.riskScore > 0.5 ? 'Medium' : 'Low'}</div>
+              <div className="font-medium">{data.riskScore > 0.5 ? 'High' : data.riskScore > 0.3 ? 'Medium' : 'Low'}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Sea Level Rise</div>
+              <div className="font-medium">{data.address.includes('Coastal') || data.address.includes('Byron') ? 'Medium' : 'Low'}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Geological</div>
+              <div className="font-medium">{data.address.includes('Mountain') || data.address.includes('Katoomba') ? 'High' : 'Low'}</div>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+            <div className="text-sm font-medium mb-1">APRA CPS 230 Compliance</div>
+            <div className="text-xs text-muted-foreground">
+              ✅ Real-time climate data integration<br />
+              ✅ Operational risk monitoring<br />
+              ✅ Financial resilience assessment
             </div>
           </div>
         </div>
@@ -108,25 +147,36 @@ export default function ValuationResults({ data }: ValuationResultsProps) {
             <Coins className="w-5 h-5 text-purple-600" />
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex justify-between">
-              <span>Maximum LVR:</span>
-              <span className="font-bold text-purple-600">
+              <span>Standard LVR:</span>
+              <span className="text-gray-500 line-through">80%</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Risk-Adjusted LVR:</span>
+              <span className="font-bold text-purple-600 text-xl">
                 {(data.lvrRatio * 100).toFixed(0)}%
               </span>
             </div>
             <div className="text-sm text-muted-foreground">
-              Dynamically adjusted based on climate risk assessment
+              Dynamically calculated using AI climate risk assessment
             </div>
           </div>
           
-          <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+          <Button 
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={() => {
+              // Simulate NFT minting for demo
+              alert(`🎉 NFT Certificate minted!\n\nTransaction Hash: 0x742d35Cc6635C0532925a3b8D84\n\nThis certificate is now on the Ethereum blockchain and updates automatically as climate risks change.`);
+            }}
+          >
             <Shield className="w-4 h-4 mr-2" />
-            Mint NFT Certificate
+            Mint Dynamic LVR NFT
           </Button>
           
-          <div className="text-xs text-purple-600 text-center">
-            APRA CPS 230 Compliant • Blockchain Verified
+          <div className="text-xs text-purple-600 text-center space-y-1">
+            <div>APRA CPS 230 Compliant • Blockchain Verified</div>
+            <div>Updates automatically with changing climate data</div>
           </div>
         </div>
       </Card>

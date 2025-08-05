@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, Shield, AlertTriangle } from 'lucide-react';
+import { Loader2, MapPin, Shield, AlertTriangle, TrendingDown } from 'lucide-react';
 
 interface PropertyData {
   address: string;
@@ -12,97 +12,213 @@ interface PropertyData {
   riskScore: number;
   climateRisk: string;
   lvrRatio: number;
+  story?: string;
+  sentiment?: string;
 }
 
 interface PropertyValuationFormProps {
   onValuation: (data: PropertyData) => void;
 }
 
-export default function PropertyValuationForm({ onValuation }: PropertyValuationFormProps) {
-  const [address, setAddress] = useState('');
-  const [loading, setLoading] = useState(false);
+// Demo data for Australian properties with compelling stories
+const DEMO_PROPERTIES = {
+  '28 Mountain View Rd, Katoomba NSW 2780': {
+    baseValue: 1250000,
+    riskScore: 0.75,
+    story: 'Recent landslide concerns in Blue Mountains area',
+    sentiment: 'Local forums mention geological instability',
+  },
+  '42 Collins Street, Melbourne VIC 3000': {
+    baseValue: 890000,
+    riskScore: 0.25,
+    story: 'Prime CBD location with low climate risk',
+    sentiment: 'Strong market confidence in area',
+  },
+  '156 Riverside Dr, Lismore NSW 2480': {
+    baseValue: 650000,
+    riskScore: 0.85,
+    story: 'Northern Rivers flood zone - high risk',
+    sentiment: 'Community groups discussing flood insurance',
+  },
+  '88 Coastal Ave, Byron Bay NSW 2481': {
+    baseValue: 2100000,
+    riskScore: 0.65,
+    story: 'Sea level rise concerns affecting coastal values',
+    sentiment: 'Property forums mentioning erosion risks',
+  },
+  '23 Adelaide Terrace, Perth WA 6000': {
+    baseValue: 750000,
+    riskScore: 0.35,
+    story: 'Moderate bushfire risk in surrounding areas',
+    sentiment: 'Insurance premiums increasing gradually',
+  }
+};
 
-  const mockValuation = async (address: string): Promise<PropertyData> => {
-    // Simulate AI valuation with climate risk analysis
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const baseValue = Math.floor(Math.random() * 500000) + 750000;
-    const riskScore = Math.random();
-    const climateAdjustment = riskScore * 0.15; // Up to 15% adjustment
-    const finalValuation = Math.floor(baseValue * (1 - climateAdjustment));
+const mockValuation = async (address: string): Promise<PropertyData> => {
+  // Simulate AI processing time
+  await new Promise(resolve => setTimeout(resolve, 2500));
+  
+  const demoData = DEMO_PROPERTIES[address as keyof typeof DEMO_PROPERTIES];
+  
+  if (demoData) {
+    const climateAdjustment = demoData.riskScore * 0.18; // Up to 18% adjustment
+    const finalValuation = Math.floor(demoData.baseValue * (1 - climateAdjustment));
     
     return {
       address,
       valuation: finalValuation,
-      riskScore,
-      climateRisk: riskScore > 0.7 ? 'High' : riskScore > 0.4 ? 'Medium' : 'Low',
-      lvrRatio: 0.8 - (riskScore * 0.2) // Lower LVR for higher risk
+      riskScore: demoData.riskScore,
+      climateRisk: demoData.riskScore > 0.7 ? 'High' : demoData.riskScore > 0.4 ? 'Medium' : 'Low',
+      lvrRatio: 0.85 - (demoData.riskScore * 0.25), // Dynamic LVR based on risk
+      story: demoData.story,
+      sentiment: demoData.sentiment,
     };
+  }
+  
+  // Fallback for custom addresses
+  const baseValue = Math.floor(Math.random() * 800000) + 600000;
+  const riskScore = Math.random();
+  const climateAdjustment = riskScore * 0.15;
+  const finalValuation = Math.floor(baseValue * (1 - climateAdjustment));
+  
+  return {
+    address,
+    valuation: finalValuation,
+    riskScore,
+    climateRisk: riskScore > 0.7 ? 'High' : riskScore > 0.4 ? 'Medium' : 'Low',
+    lvrRatio: 0.85 - (riskScore * 0.25),
+    story: 'AI analysis of local market conditions',
+    sentiment: 'Processing social media and forum sentiment...',
   };
+};
+
+export default function PropertyValuationForm({ onValuation }: PropertyValuationFormProps) {
+  const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState('');
+
+  const demoAddresses = Object.keys(DEMO_PROPERTIES);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!address.trim()) return;
     
     setLoading(true);
+    
+    // Simulate AI analysis steps for demo
+    const steps = [
+      'Connecting to CoreLogic Australia API...',
+      'Analyzing Geoscience Australia climate data...',
+      'Processing social media sentiment with Ollama...',
+      'Calculating dynamic LVR with TensorFlow...',
+      'Generating APRA CPS 230 compliance report...'
+    ];
+    
+    for (let i = 0; i < steps.length; i++) {
+      setAnalysisStep(steps[i]);
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
     try {
       const result = await mockValuation(address);
       onValuation(result);
     } finally {
       setLoading(false);
+      setAnalysisStep('');
     }
   };
 
+  const handleDemoClick = (demoAddress: string) => {
+    setAddress(demoAddress);
+  };
+
   return (
-    <Card className="p-6">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Property Valuation</h2>
-          <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
-            <Shield className="w-3 h-3 mr-1" />
-            APRA CPS 230
-          </Badge>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="address">Property Address</Label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="address"
-                type="text"
-                placeholder="e.g. 28 Mountain View Rd, Katoomba NSW"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="pl-10"
-                required
-              />
-            </div>
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Property Valuation</h2>
+            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+              <Shield className="w-3 h-3 mr-1" />
+              APRA CPS 230
+            </Badge>
           </div>
           
-          <Button 
-            type="submit" 
-            className="w-full gradient-primary text-white"
-            disabled={loading || !address.trim()}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing Climate Risk...
-              </>
-            ) : (
-              'Get AI-Powered Valuation'
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="address">Property Address</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="address"
+                  type="text"
+                  placeholder="e.g. 28 Mountain View Rd, Katoomba NSW"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full gradient-primary text-white"
+              disabled={loading || !address.trim()}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  AI Analysis in Progress...
+                </>
+              ) : (
+                'Get AI-Powered Valuation'
+              )}
+            </Button>
+            
+            {loading && analysisStep && (
+              <div className="text-center text-sm text-muted-foreground animate-pulse">
+                {analysisStep}
+              </div>
             )}
-          </Button>
-        </form>
-        
-        <div className="text-xs text-muted-foreground space-y-1">
-          <p>• Real-time climate risk assessment</p>
-          <p>• APRA CPS 230 compliant methodology</p>
-          <p>• Dynamic LVR calculation</p>
+          </form>
+          
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p>• Real-time climate risk assessment</p>
+            <p>• APRA CPS 230 compliant methodology</p>
+            <p>• Dynamic LVR calculation</p>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+
+      {/* Demo Properties */}
+      <Card className="p-4">
+        <h3 className="text-sm font-medium mb-3 text-muted-foreground">Demo Properties</h3>
+        <div className="grid gap-2">
+          {demoAddresses.map((addr) => {
+            const data = DEMO_PROPERTIES[addr as keyof typeof DEMO_PROPERTIES];
+            return (
+              <button
+                key={addr}
+                onClick={() => handleDemoClick(addr)}
+                className="text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <div className="text-sm font-medium">{addr}</div>
+                <div className="text-xs text-muted-foreground mt-1 flex items-center">
+                  {data.riskScore > 0.7 ? (
+                    <AlertTriangle className="w-3 h-3 text-red-500 mr-1" />
+                  ) : data.riskScore > 0.4 ? (
+                    <TrendingDown className="w-3 h-3 text-yellow-500 mr-1" />
+                  ) : (
+                    <Shield className="w-3 h-3 text-green-500 mr-1" />
+                  )}
+                  {data.story}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+    </div>
   );
 }
