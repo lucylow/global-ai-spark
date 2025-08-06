@@ -5,8 +5,11 @@ import PropertyMetrics from '@/components/PropertyMetrics';
 import ValuationResults from '@/components/ValuationResults';
 import RiskHeatmap from '@/components/RiskHeatmap';
 import MarketSentiment from '@/components/MarketSentiment';
+import PropertyNFTMinter from '@/components/PropertyNFTMinter';
+import NFTVerifier from '@/components/NFTVerifier';
+import ValuationReport from '@/components/ValuationReport';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Building, TrendingUp, BarChart3, Map, FileText } from 'lucide-react';
+import { Shield, Building, TrendingUp, BarChart3, Map, FileText, Coins } from 'lucide-react';
 
 interface PropertyData {
   address: string;
@@ -127,6 +130,7 @@ const Index = () => {
                 {[
                   { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
                   { id: 'map', label: 'Risk Map', icon: Map },
+                  { id: 'nft', label: 'Blockchain', icon: Coins },
                   { id: 'report', label: 'Report', icon: FileText }
                 ].map((tab) => {
                   const Icon = tab.icon;
@@ -318,14 +322,42 @@ const Index = () => {
           </div>
         )}
         
-        {/* Valuation Report */}
+        {/* Blockchain NFT Section */}
+        {activeTab === 'nft' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-card rounded-xl shadow-lg p-6 border">
+              <h2 className="text-xl font-semibold mb-4">Valuation Certification</h2>
+              {propertyData ? (
+                <PropertyNFTMinter report={propertyData} />
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Coins className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">NFT Minting</h3>
+                  <p className="text-sm">Analyze a property to mint a valuation NFT certificate</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="bg-card rounded-xl shadow-lg p-6 border">
+              <h2 className="text-xl font-semibold mb-4">Verify Valuation NFT</h2>
+              <NFTVerifier />
+            </div>
+          </div>
+        )}
+
+        {/* Professional Valuation Report */}
         {activeTab === 'report' && propertyData && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="bg-card rounded-xl shadow-lg overflow-hidden border"
           >
-            <ValuationResults data={propertyData} />
+            <ValuationReport 
+              valuation={propertyData.valuation}
+              risk={propertyData.risk}
+              compliance={propertyData.compliance}
+              property={{ address: propertyData.address }}
+            />
           </motion.div>
         )}
         
