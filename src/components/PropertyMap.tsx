@@ -1,7 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Box, Sphere, Plane } from '@react-three/drei';
-import * as THREE from 'three';
+import { useState, useEffect } from 'react';
 
 interface PropertyMapProps {
   riskData?: {
@@ -15,133 +12,6 @@ interface PropertyMapProps {
     fire: boolean;
     erosion: boolean;
   };
-}
-
-function Building({ position, riskLevel = 0 }: { position: [number, number, number], riskLevel?: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.002;
-    }
-  });
-
-  const color = new THREE.Color(
-    1 - riskLevel,
-    1 - (riskLevel * 0.5),
-    0.5
-  );
-
-  return (
-    <Box
-      ref={meshRef}
-      position={position}
-      scale={[1, 1 + Math.random() * 2, 1]}
-      castShadow
-      receiveShadow
-    >
-      <meshPhongMaterial color={color} />
-    </Box>
-  );
-}
-
-function RiskOverlays({ riskData, activeLayers }: { riskData?: any, activeLayers: any }) {
-  if (!riskData) return null;
-
-  return (
-    <group>
-      {/* Flood overlay */}
-      {activeLayers.flood && riskData.flood && riskData.flood > 0.2 && (
-        <Plane
-          args={[8, 4]}
-          position={[0, 0.1, 2]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <meshBasicMaterial
-            color="#0066cc"
-            transparent
-            opacity={0.4}
-            side={THREE.DoubleSide}
-          />
-        </Plane>
-      )}
-
-      {/* Fire risk indicators */}
-      {activeLayers.fire && riskData.fire && riskData.fire > 0.3 && (
-        <group>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Sphere
-              key={i}
-              args={[0.3, 8, 8]}
-              position={[
-                Math.random() * 4 - 2,
-                1 + Math.random() * 2,
-                Math.random() * 3 - 1
-              ]}
-            >
-              <meshBasicMaterial
-                color="#ff5500"
-                transparent
-                opacity={0.7}
-              />
-            </Sphere>
-          ))}
-        </group>
-      )}
-    </group>
-  );
-}
-
-function CityScene({ riskData, activeLayers }: { riskData?: any, activeLayers: any }) {
-  const buildings = Array.from({ length: 12 }, (_, i) => ({
-    position: [
-      (i % 4) * 2 - 3,
-      0,
-      Math.floor(i / 4) * 2 - 2
-    ] as [number, number, number],
-    risk: riskData?.flood || Math.random() * 0.8
-  }));
-
-  return (
-    <>
-      {/* Ground plane */}
-      <Plane
-        args={[20, 20]}
-        position={[0, -0.5, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        receiveShadow
-      >
-        <meshLambertMaterial color="#90EE90" />
-      </Plane>
-
-      {/* Grid */}
-      <gridHelper args={[20, 20, 0x444444, 0x222222]} />
-
-      {/* Buildings */}
-      {buildings.map((building, index) => (
-        <Building
-          key={index}
-          position={building.position}
-          riskLevel={building.risk}
-        />
-      ))}
-
-      {/* Risk overlays */}
-      <RiskOverlays riskData={riskData} activeLayers={activeLayers} />
-
-      {/* Lighting */}
-      <ambientLight intensity={0.6} />
-      <directionalLight
-        position={[10, 20, 15]}
-        intensity={0.8}
-        castShadow
-        shadow-camera-left={-10}
-        shadow-camera-right={10}
-        shadow-camera-top={10}
-        shadow-camera-bottom={-10}
-      />
-    </>
-  );
 }
 
 export default function PropertyMap({ riskData, activeLayers = {
@@ -159,33 +29,83 @@ export default function PropertyMap({ riskData, activeLayers = {
 
   if (isLoading) {
     return (
-      <div className="w-full h-[500px] flex items-center justify-center bg-gray-100 rounded-xl">
+      <div className="w-full h-[500px] flex items-center justify-center bg-gradient-to-b from-sky-100 to-blue-50 rounded-xl">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading 3D property visualization...</p>
+          <p className="text-muted-foreground">Loading property visualization...</p>
         </div>
       </div>
     );
   }
 
+  // Create a simple visual representation without Three.js for now
+  const generateRiskVisualization = () => {
+    if (!riskData) return null;
+
+    const risks = [
+      { label: 'Flood Risk', value: riskData.flood || 0, color: 'bg-blue-500', active: activeLayers.flood },
+      { label: 'Fire Risk', value: riskData.fire || 0, color: 'bg-orange-500', active: activeLayers.fire },
+      { label: 'Erosion Risk', value: riskData.coastalErosion || 0, color: 'bg-yellow-500', active: activeLayers.erosion }
+    ];
+
+    return risks.filter(risk => risk.active && risk.value > 0.2);
+  };
+
+  const activeRisks = generateRiskVisualization();
+
   return (
     <div className="w-full h-[500px] relative bg-gradient-to-b from-sky-100 to-blue-50 rounded-xl overflow-hidden">
-      <Canvas
-        shadows
-        camera={{ position: [0, 8, 15], fov: 60 }}
-        style={{ background: 'linear-gradient(to bottom, #f0f9ff, #e0f2fe)' }}
-      >
-        <CityScene riskData={riskData} activeLayers={activeLayers} />
-        <OrbitControls
-          enableDamping
-          dampingFactor={0.05}
-          minDistance={5}
-          maxDistance={30}
-        />
-      </Canvas>
+      {/* Fallback visualization */}
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="relative w-80 h-80">
+          {/* Property grid representation */}
+          <div className="grid grid-cols-4 gap-2 p-4">
+            {Array.from({ length: 16 }).map((_, i) => {
+              const riskLevel = riskData ? 
+                (riskData.flood || 0) + (riskData.fire || 0) + (riskData.coastalErosion || 0) : 
+                Math.random() * 0.6;
+              
+              return (
+                <div
+                  key={i}
+                  className={`
+                    w-12 h-12 rounded-lg shadow-sm border-2 transition-all duration-500
+                    ${riskLevel > 0.6 ? 'bg-red-400 border-red-600' : 
+                      riskLevel > 0.3 ? 'bg-yellow-400 border-yellow-600' : 
+                      'bg-green-400 border-green-600'}
+                  `}
+                  style={{
+                    transform: `scale(${0.8 + Math.random() * 0.4})`,
+                    animationDelay: `${i * 100}ms`
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Risk overlays */}
+          {activeRisks && activeRisks.map((risk, index) => (
+            <div
+              key={risk.label}
+              className={`
+                absolute inset-0 rounded-full opacity-30 animate-pulse
+                ${risk.color}
+              `}
+              style={{
+                width: `${risk.value * 200 + 100}px`,
+                height: `${risk.value * 200 + 100}px`,
+                top: '50%',
+                left: '50%',
+                transform: `translate(-50%, -50%) scale(${0.5 + risk.value * 0.5})`,
+                animationDelay: `${index * 200}ms`
+              }}
+            />
+          ))}
+        </div>
+      </div>
       
       <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white p-2 rounded text-sm">
-        {riskData ? '3D Property Risk Visualization' : 'Interactive Property Map'}
+        {riskData ? 'Property Risk Visualization' : 'Interactive Property Map'}
       </div>
       
       <div className="absolute top-4 right-4 bg-white bg-opacity-90 p-3 rounded-lg text-xs">
@@ -205,6 +125,18 @@ export default function PropertyMap({ riskData, activeLayers = {
           </div>
         </div>
       </div>
+
+      {/* Risk layer indicator */}
+      {riskData && (
+        <div className="absolute bottom-4 right-4 bg-white bg-opacity-90 p-2 rounded text-xs">
+          <div className="font-medium mb-1">Active Layers</div>
+          <div className="space-y-1">
+            {activeLayers.flood && <div className="text-blue-600">• Flood Zone</div>}
+            {activeLayers.fire && <div className="text-orange-600">• Fire Risk</div>}
+            {activeLayers.erosion && <div className="text-yellow-600">• Erosion Risk</div>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
