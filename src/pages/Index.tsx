@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import PropertyMap from '@/components/PropertyMap';
 import PropertyMetrics from '@/components/PropertyMetrics';
 import ValuationResults from '@/components/ValuationResults';
@@ -9,7 +9,7 @@ import PropertyNFTMinter from '@/components/PropertyNFTMinter';
 import NFTVerifier from '@/components/NFTVerifier';
 import ValuationReport from '@/components/ValuationReport';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Building, TrendingUp, BarChart3, Map, FileText, Coins } from 'lucide-react';
+import { Shield, Building, TrendingUp, BarChart3, Map, FileText, Coins, Menu, X, CheckCircle, AlertTriangle, Clock, Search } from 'lucide-react';
 
 interface PropertyData {
   address: string;
@@ -35,6 +35,13 @@ interface PropertyData {
     reasons: string[];
     lvr: number;
     dti: number;
+    apraCompliance?: {
+      aps220: string;
+      aps221: string;
+      prudentialStandards: string;
+      lastAudit: Date;
+      nextReview: Date;
+    };
   };
 }
 
@@ -44,16 +51,36 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [auditLog, setAuditLog] = useState<any[]>([]);
   const [riskLayers, setRiskLayers] = useState({
     flood: true,
     fire: true,
     erosion: false
   });
 
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'map', label: 'Risk Analysis', icon: Map },
+    { id: 'nft', label: 'Blockchain', icon: Coins },
+    { id: 'compliance', label: 'APRA Compliance', icon: CheckCircle },
+    { id: 'report', label: 'Reports', icon: FileText }
+  ];
+
   const handleCommandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    
+    // Add to audit log
+    const auditEntry = {
+      timestamp: new Date(),
+      action: 'PROPERTY_ANALYSIS_INITIATED',
+      user: 'system',
+      details: { query: command },
+      status: 'IN_PROGRESS'
+    };
+    setAuditLog(prev => [auditEntry, ...prev]);
     
     try {
       // Simulate API call with demo data
@@ -92,11 +119,25 @@ const Index = () => {
           status: Math.random() > 0.8 ? 'REVIEW' : 'APPROVED',
           reasons: ['Climate risk assessment complete', 'APRA CPS 230 compliant'],
           lvr: 0.65 + Math.random() * 0.15,
-          dti: 4 + Math.random() * 2
+          dti: 4 + Math.random() * 2,
+          apraCompliance: {
+            aps220: 'COMPLIANT',
+            aps221: 'COMPLIANT',
+            prudentialStandards: 'VERIFIED',
+            lastAudit: new Date('2024-01-15'),
+            nextReview: new Date('2024-07-15')
+          }
         }
       };
       
       setPropertyData(demoData);
+      
+      // Update audit log
+      setAuditLog(prev => prev.map(entry => 
+        entry === auditEntry 
+          ? { ...entry, status: 'COMPLETED', completedAt: new Date() }
+          : entry
+      ));
     } catch (err) {
       setError('Failed to assess property');
     } finally {
@@ -125,14 +166,10 @@ const Index = () => {
               </h1>
             </div>
             
+            {/* Desktop Navigation */}
             <nav className="hidden md:block">
               <ul className="flex space-x-6">
-                {[
-                  { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-                  { id: 'map', label: 'Risk Map', icon: Map },
-                  { id: 'nft', label: 'Blockchain', icon: Coins },
-                  { id: 'report', label: 'Report', icon: FileText }
-                ].map((tab) => {
+                {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
                     <li key={tab.id}>
@@ -162,10 +199,51 @@ const Index = () => {
                 <TrendingUp className="w-3 h-3 mr-1" />
                 AI-Powered
               </Badge>
+              
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg hover:bg-muted"
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            className="md:hidden bg-background border-b shadow-lg"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="px-4 py-2 space-y-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                    activeTab === tab.id
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Command Input */}
@@ -181,7 +259,7 @@ const Index = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-muted-foreground">🔍</span>
+                  <Search className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <input
                   type="text"
@@ -210,164 +288,232 @@ const Index = () => {
           </form>
         </motion.div>
 
-        {/* Dashboard Content */}
-        {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Map */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-card rounded-xl shadow-lg overflow-hidden border">
-                <PropertyMap 
-                  riskData={propertyData?.risk} 
-                  activeLayers={riskLayers}
-                />
-              </div>
-              
-              {/* Risk Layer Controls */}
-              <div className="bg-card rounded-xl shadow-lg p-4 border">
-                <h3 className="font-medium text-card-foreground mb-3">Risk Visualization Layers</h3>
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(riskLayers).map(([layer, active]) => (
-                    <button
-                      key={layer}
-                      onClick={() => toggleRiskLayer(layer)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-                        active
-                          ? layer === 'flood' 
-                            ? 'bg-blue-100 text-blue-800 border border-blue-200' 
-                            : layer === 'fire'
-                            ? 'bg-orange-100 text-orange-800 border border-orange-200'
-                            : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                          : 'bg-muted text-muted-foreground border border-border hover:bg-muted/80'
-                      }`}
-                    >
-                      {layer} {active ? '✓' : ''}
-                    </button>
-                  ))}
+        {/* Tab Content with Animations */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Dashboard Content */}
+            {activeTab === 'dashboard' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                {/* Left Column - Map */}
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="bg-card rounded-xl shadow-lg overflow-hidden border">
+                    <PropertyMap 
+                      riskData={propertyData?.risk} 
+                      activeLayers={riskLayers}
+                    />
+                  </div>
+                  
+                  {/* Risk Layer Controls */}
+                  <div className="bg-card rounded-xl shadow-lg p-4 border">
+                    <h3 className="font-medium text-card-foreground mb-3">Risk Visualization Layers</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(riskLayers).map(([layer, active]) => (
+                        <button
+                          key={layer}
+                          onClick={() => toggleRiskLayer(layer)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
+                            active
+                              ? layer === 'flood' 
+                                ? 'bg-blue-100 text-blue-800 border border-blue-200' 
+                                : layer === 'fire'
+                                ? 'bg-orange-100 text-orange-800 border border-orange-200'
+                                : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                              : 'bg-muted text-muted-foreground border border-border hover:bg-muted/80'
+                          }`}
+                        >
+                          {layer} {active ? '✓' : ''}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Right Column - Metrics */}
+                <div className="space-y-6">
+                  <div className="bg-card rounded-xl shadow-lg p-6 border">
+                    <h2 className="text-xl font-semibold mb-4">Property Analytics</h2>
+                    {propertyData ? (
+                      <PropertyMetrics metrics={propertyData} />
+                    ) : (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Building className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <h3 className="text-lg font-medium mb-2">No Property Analyzed</h3>
+                        <p className="text-sm">Enter a property query to see AI-powered valuation metrics</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <MarketSentiment 
+                    sentiment={propertyData?.sentiment} 
+                    isLoading={isLoading}
+                  />
                 </div>
               </div>
-            </div>
+            )}
             
-            {/* Right Column - Metrics */}
-            <div className="space-y-6">
-              <div className="bg-card rounded-xl shadow-lg p-6 border">
-                <h2 className="text-xl font-semibold mb-4">Property Analytics</h2>
-                {propertyData ? (
-                  <PropertyMetrics metrics={propertyData} />
-                ) : (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Building className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-lg font-medium mb-2">No Property Analyzed</h3>
-                    <p className="text-sm">Enter a property query to see AI-powered valuation metrics</p>
-                  </div>
-                )}
-              </div>
-              
-              <MarketSentiment 
-                sentiment={propertyData?.sentiment} 
-                isLoading={isLoading}
-              />
-            </div>
-          </div>
-        )}
-        
-        {/* Risk Map View */}
-        {activeTab === 'map' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <RiskHeatmap 
-              riskData={propertyData?.risk} 
-              location={propertyData?.address}
-            />
-            
-            <div className="bg-card rounded-xl shadow-lg p-6 border">
-              <h3 className="text-xl font-semibold mb-4">Climate Risk Projections</h3>
-              {propertyData?.risk ? (
-                <div className="space-y-4">
-                  {Object.entries(propertyData.risk).map(([riskType, value]) => (
-                    <div key={riskType}>
-                      <div className="flex justify-between mb-1">
-                        <span className="capitalize font-medium">{riskType.replace(/([A-Z])/g, ' $1')} Risk</span>
-                        <span>{Math.round(Number(value) * 100)}%</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full transition-all duration-1000 ${
-                            Number(value) > 0.7 
-                              ? 'bg-destructive' 
-                              : Number(value) > 0.4 
-                                ? 'bg-yellow-500' 
-                                : 'bg-green-500'
-                          }`}
-                          style={{ width: `${Number(value) * 100}%` }}
-                        />
+            {/* Risk Analysis View */}
+            {activeTab === 'map' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                <RiskHeatmap 
+                  riskData={propertyData?.risk} 
+                  location={propertyData?.address}
+                />
+                
+                <div className="bg-card rounded-xl shadow-lg p-6 border">
+                  <h3 className="text-xl font-semibold mb-4">Climate Risk Projections</h3>
+                  {propertyData?.risk ? (
+                    <div className="space-y-4">
+                      {Object.entries(propertyData.risk).map(([riskType, value]) => (
+                        <div key={riskType}>
+                          <div className="flex justify-between mb-1">
+                            <span className="capitalize font-medium">{riskType.replace(/([A-Z])/g, ' $1')} Risk</span>
+                            <span>{Math.round(Number(value) * 100)}%</span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <motion.div 
+                              className={`h-full ${
+                                Number(value) > 0.7 
+                                  ? 'bg-destructive' 
+                                  : Number(value) > 0.4 
+                                    ? 'bg-yellow-500' 
+                                    : 'bg-green-500'
+                              }`}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Number(value) * 100}%` }}
+                              transition={{ duration: 1, ease: "easeOut" }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                        <h4 className="font-medium text-primary mb-2">Risk Mitigation Strategies</h4>
+                        <ul className="list-disc pl-5 text-sm space-y-1 text-muted-foreground">
+                          <li>Flood-resistant construction materials</li>
+                          <li>Defensible space around property</li>
+                          <li>Stormwater management system</li>
+                          <li>Insurance premium discounts available</li>
+                        </ul>
                       </div>
                     </div>
-                  ))}
-                  <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                    <h4 className="font-medium text-primary mb-2">Risk Mitigation Strategies</h4>
-                    <ul className="list-disc pl-5 text-sm space-y-1 text-muted-foreground">
-                      <li>Flood-resistant construction materials</li>
-                      <li>Defensible space around property</li>
-                      <li>Stormwater management system</li>
-                      <li>Insurance premium discounts available</li>
-                    </ul>
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Analyze a property to view detailed risk data</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Blockchain NFT Section */}
+            {activeTab === 'nft' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                <div className="bg-card rounded-xl shadow-lg p-6 border">
+                  <h2 className="text-xl font-semibold mb-4">Valuation Certification</h2>
+                  {propertyData ? (
+                    <PropertyNFTMinter report={propertyData} />
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Coins className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <h3 className="text-lg font-medium mb-2">NFT Minting</h3>
+                      <p className="text-sm">Analyze a property to mint a valuation NFT certificate</p>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="bg-card rounded-xl shadow-lg p-6 border">
+                  <h2 className="text-xl font-semibold mb-4">Verify Valuation NFT</h2>
+                  <NFTVerifier />
+                </div>
+              </div>
+            )}
+
+            {/* APRA Compliance Section */}
+            {activeTab === 'compliance' && (
+              <div className="space-y-6 lg:space-y-8">
+                <div className="bg-card rounded-xl shadow-lg p-6 border">
+                  <h3 className="text-xl font-semibold mb-6">APRA Compliance Dashboard</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                      <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                      <h4 className="font-medium text-green-800">APS 220</h4>
+                      <p className="text-sm text-green-700">Compliant</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                      <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                      <h4 className="font-medium text-green-800">APS 221</h4>
+                      <p className="text-sm text-green-700">Compliant</p>
+                    </div>
+                    <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <Clock className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                      <h4 className="font-medium text-yellow-800">Review Due</h4>
+                      <p className="text-sm text-yellow-700">15 Jul 2024</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-medium text-foreground mb-3">Audit Trail</h4>
+                      <div className="space-y-3">
+                        {auditLog.slice(0, 5).map((entry, index) => (
+                          <motion.div 
+                            key={index} 
+                            className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-2 h-2 rounded-full ${
+                                entry.status === 'COMPLETED' ? 'bg-green-500' : 
+                                entry.status === 'IN_PROGRESS' ? 'bg-yellow-500' : 'bg-muted-foreground'
+                              }`} />
+                              <span className="text-sm font-medium">{entry.action.replace(/_/g, ' ')}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {entry.timestamp.toLocaleTimeString()}
+                            </span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Analyze a property to view detailed risk data</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        
-        {/* Blockchain NFT Section */}
-        {activeTab === 'nft' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-card rounded-xl shadow-lg p-6 border">
-              <h2 className="text-xl font-semibold mb-4">Valuation Certification</h2>
-              {propertyData ? (
-                <PropertyNFTMinter report={propertyData} />
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Coins className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">NFT Minting</h3>
-                  <p className="text-sm">Analyze a property to mint a valuation NFT certificate</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="bg-card rounded-xl shadow-lg p-6 border">
-              <h2 className="text-xl font-semibold mb-4">Verify Valuation NFT</h2>
-              <NFTVerifier />
-            </div>
-          </div>
-        )}
+              </div>
+            )}
 
-        {/* Professional Valuation Report */}
-        {activeTab === 'report' && propertyData && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-card rounded-xl shadow-lg overflow-hidden border"
-          >
-            <ValuationReport 
-              valuation={propertyData.valuation}
-              risk={propertyData.risk}
-              compliance={propertyData.compliance}
-              property={{ address: propertyData.address }}
-            />
+            {/* Professional Valuation Report */}
+            {activeTab === 'report' && propertyData && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-card rounded-xl shadow-lg overflow-hidden border"
+              >
+                <ValuationReport 
+                  valuation={propertyData.valuation}
+                  risk={propertyData.risk}
+                  compliance={propertyData.compliance}
+                  property={{ address: propertyData.address }}
+                />
+              </motion.div>
+            )}
+            
+            {activeTab === 'report' && !propertyData && (
+              <div className="bg-card rounded-xl shadow-lg p-12 text-center border">
+                <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-xl font-semibold mb-2">No Report Available</h3>
+                <p className="text-muted-foreground">Analyze a property to generate a comprehensive valuation report</p>
+              </div>
+            )}
           </motion.div>
-        )}
-        
-        {activeTab === 'report' && !propertyData && (
-          <div className="bg-card rounded-xl shadow-lg p-12 text-center border">
-            <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-xl font-semibold mb-2">No Report Available</h3>
-            <p className="text-muted-foreground">Analyze a property to generate a comprehensive valuation report</p>
-          </div>
-        )}
+        </AnimatePresence>
       </main>
     </div>
   );
