@@ -11,7 +11,24 @@ interface PropertyData {
   climateRisk: string;
   lvrRatio: number;
   story?: string;
-  sentiment?: string;
+  sentiment?: {
+    score: number;
+    magnitude: number;
+    keywords: [string, number][];
+  };
+  risk?: {
+    flood: number;
+    fire: number;
+    coastalErosion: number;
+    subsidence: number;
+    market: number;
+  };
+  compliance?: {
+    status: 'APPROVED' | 'REVIEW' | 'REJECTED';
+    reasons: string[];
+    lvr: number;
+    dti: number;
+  };
 }
 
 interface ValuationResultsProps {
@@ -86,7 +103,7 @@ export default function ValuationResults({ data }: ValuationResultsProps) {
             </div>
             {data.sentiment && (
               <div className="text-sm text-blue-700">
-                <strong>Sentiment Analysis:</strong> {data.sentiment}
+                <strong>Sentiment Analysis:</strong> {data.sentiment.score > 0 ? 'Positive' : 'Negative'} market sentiment ({Math.abs(data.sentiment.score * 100).toFixed(1)}%)
               </div>
             )}
             <div className="text-xs text-blue-600">
