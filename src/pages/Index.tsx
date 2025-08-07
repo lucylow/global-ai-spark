@@ -8,6 +8,7 @@ import MarketSentiment from '@/components/MarketSentiment';
 import PropertyNFTMinter from '@/components/PropertyNFTMinter';
 import NFTVerifier from '@/components/NFTVerifier';
 import ValuationReport from '@/components/ValuationReport';
+import Web3Monetization from '@/components/Web3Monetization';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Building, TrendingUp, BarChart3, Map, FileText, Coins, Menu, X, CheckCircle, AlertTriangle, Clock, Search } from 'lucide-react';
 
@@ -64,7 +65,8 @@ const Index = () => {
     { id: 'map', label: 'Risk Analysis', icon: Map },
     { id: 'nft', label: 'Blockchain', icon: Coins },
     { id: 'compliance', label: 'APRA Compliance', icon: CheckCircle },
-    { id: 'report', label: 'Reports', icon: FileText }
+    { id: 'report', label: 'Reports', icon: FileText },
+    { id: 'pricing', label: '💰 Pricing', icon: TrendingUp }
   ];
 
   const handleCommandSubmit = async (e: React.FormEvent) => {
@@ -511,6 +513,11 @@ const Index = () => {
                 <h3 className="text-xl font-semibold mb-2">No Report Available</h3>
                 <p className="text-muted-foreground">Analyze a property to generate a comprehensive valuation report</p>
               </div>
+            )}
+
+            {/* Pricing Section */}
+            {activeTab === 'pricing' && (
+              <Web3Monetization />
             )}
           </motion.div>
         </AnimatePresence>
