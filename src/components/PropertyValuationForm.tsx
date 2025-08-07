@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, Shield, AlertTriangle, TrendingDown } from 'lucide-react';
+import { Loader2, MapPin, Shield, AlertTriangle, TrendingDown, Database } from 'lucide-react';
+import { CoreLogicClient } from '@/lib/apis/corelogic';
 
 interface PropertyData {
   address: string;
@@ -55,47 +56,74 @@ const DEMO_PROPERTIES = {
 };
 
 const mockValuation = async (address: string): Promise<PropertyData> => {
+  // Initialize CoreLogic client
+  const coreLogicClient = new CoreLogicClient();
+  
   // Simulate AI processing time
   await new Promise(resolve => setTimeout(resolve, 2500));
   
-  const demoData = DEMO_PROPERTIES[address as keyof typeof DEMO_PROPERTIES];
-  
-  if (demoData) {
-    const climateAdjustment = demoData.riskScore * 0.18; // Up to 18% adjustment
-    const finalValuation = Math.floor(demoData.baseValue * (1 - climateAdjustment));
+  try {
+    // Get enhanced property data from CoreLogic
+    const propertyData = await coreLogicClient.getEnhancedPropertyDetails(address);
+    
+    // Use real CoreLogic data for more accurate valuation
+    const climateAdjustment = propertyData.riskFactors.length * 0.05; // 5% per risk factor
+    const finalValuation = Math.floor(propertyData.estimatedValue * (1 - climateAdjustment));
+    
+    return {
+      address: propertyData.address,
+      valuation: finalValuation,
+      riskScore: propertyData.riskFactors.length / 10, // Normalize risk score
+      climateRisk: propertyData.riskFactors.length > 3 ? 'High' : 
+                   propertyData.riskFactors.length > 1 ? 'Medium' : 'Low',
+      lvrRatio: Math.max(0.6, 0.85 - (propertyData.riskFactors.length * 0.05)),
+      story: propertyData.riskFactors.length > 0 ? 
+        `CoreLogic analysis: ${propertyData.riskFactors[0]}` :
+        `Prime ${propertyData.suburb} location with strong fundamentals`,
+      sentiment: `Market trends: ${propertyData.marketTrends.priceGrowth12m > 0 ? 'Positive' : 'Neutral'} growth (${propertyData.marketTrends.priceGrowth12m}% YoY)`,
+    };
+  } catch (error) {
+    // Fallback to demo data if CoreLogic fails
+    const demoData = DEMO_PROPERTIES[address as keyof typeof DEMO_PROPERTIES];
+    
+    if (demoData) {
+      const climateAdjustment = demoData.riskScore * 0.18;
+      const finalValuation = Math.floor(demoData.baseValue * (1 - climateAdjustment));
+      
+      return {
+        address,
+        valuation: finalValuation,
+        riskScore: demoData.riskScore,
+        climateRisk: demoData.riskScore > 0.7 ? 'High' : demoData.riskScore > 0.4 ? 'Medium' : 'Low',
+        lvrRatio: 0.85 - (demoData.riskScore * 0.25),
+        story: demoData.story,
+        sentiment: demoData.sentiment,
+      };
+    }
+    
+    // Final fallback
+    const baseValue = Math.floor(Math.random() * 800000) + 600000;
+    const riskScore = Math.random();
+    const climateAdjustment = riskScore * 0.15;
+    const finalValuation = Math.floor(baseValue * (1 - climateAdjustment));
     
     return {
       address,
       valuation: finalValuation,
-      riskScore: demoData.riskScore,
-      climateRisk: demoData.riskScore > 0.7 ? 'High' : demoData.riskScore > 0.4 ? 'Medium' : 'Low',
-      lvrRatio: 0.85 - (demoData.riskScore * 0.25), // Dynamic LVR based on risk
-      story: demoData.story,
-      sentiment: demoData.sentiment,
+      riskScore,
+      climateRisk: riskScore > 0.7 ? 'High' : riskScore > 0.4 ? 'Medium' : 'Low',
+      lvrRatio: 0.85 - (riskScore * 0.25),
+      story: 'AI analysis of local market conditions',
+      sentiment: 'Processing social media and forum sentiment...',
     };
   }
-  
-  // Fallback for custom addresses
-  const baseValue = Math.floor(Math.random() * 800000) + 600000;
-  const riskScore = Math.random();
-  const climateAdjustment = riskScore * 0.15;
-  const finalValuation = Math.floor(baseValue * (1 - climateAdjustment));
-  
-  return {
-    address,
-    valuation: finalValuation,
-    riskScore,
-    climateRisk: riskScore > 0.7 ? 'High' : riskScore > 0.4 ? 'Medium' : 'Low',
-    lvrRatio: 0.85 - (riskScore * 0.25),
-    story: 'AI analysis of local market conditions',
-    sentiment: 'Processing social media and forum sentiment...',
-  };
 };
 
 export default function PropertyValuationForm({ onValuation }: PropertyValuationFormProps) {
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [analysisStep, setAnalysisStep] = useState('');
+  const [dataMode, setDataMode] = useState('');
 
   const demoAddresses = Object.keys(DEMO_PROPERTIES);
 
@@ -105,9 +133,14 @@ export default function PropertyValuationForm({ onValuation }: PropertyValuation
     
     setLoading(true);
     
+    // Show data mode
+    const coreLogicClient = new CoreLogicClient();
+    setDataMode(coreLogicClient.getDataMode());
+    
     // Simulate AI analysis steps for demo
     const steps = [
       'Connecting to CoreLogic Australia API...',
+      'Fetching property features and sales history...',
       'Analyzing Geoscience Australia climate data...',
       'Processing social media sentiment with Ollama...',
       'Calculating dynamic LVR with TensorFlow...',
@@ -125,6 +158,7 @@ export default function PropertyValuationForm({ onValuation }: PropertyValuation
     } finally {
       setLoading(false);
       setAnalysisStep('');
+      setDataMode('');
     }
   };
 
@@ -179,6 +213,13 @@ export default function PropertyValuationForm({ onValuation }: PropertyValuation
             {loading && analysisStep && (
               <div className="text-center text-sm text-muted-foreground animate-pulse">
                 {analysisStep}
+              </div>
+            )}
+            
+            {dataMode && (
+              <div className="flex items-center justify-center text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 mt-2">
+                <Database className="w-3 h-3 mr-1" />
+                {dataMode}
               </div>
             )}
           </form>
