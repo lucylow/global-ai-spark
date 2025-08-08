@@ -7,6 +7,11 @@ import { PropertyAnalytics } from '@/components/PropertyAnalytics';
 import MarketSentiment from '@/components/MarketSentiment';
 import { RiskVisualization } from './RiskVisualization';
 import { SystemHealth } from '@/components/SystemHealth';
+import { RiskAnalysisPage } from '../risk/RiskAnalysisPage';
+import { BlockchainPage } from '../blockchain/BlockchainPage';
+import { CompliancePage } from '../compliance/CompliancePage';
+import { ReportsPage } from '../reports/ReportsPage';
+import { PricingPage } from '../pricing/PricingPage';
 import { usePropertyAnalysis } from '@/hooks/usePropertyAnalysis';
 import { useSystemHealth } from '@/hooks/useSystemHealth';
 
@@ -67,60 +72,15 @@ export const Dashboard: React.FC = () => {
           </>
         );
       case 'risk':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Risk Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Comprehensive risk analysis tools and visualizations coming soon...</p>
-            </CardContent>
-          </Card>
-        );
+        return <RiskAnalysisPage />;
       case 'blockchain':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Blockchain Certificates</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">NFT minting and blockchain verification tools coming soon...</p>
-            </CardContent>
-          </Card>
-        );
+        return <BlockchainPage />;
       case 'compliance':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>APRA Compliance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">APRA CPS 230 compliance reporting and monitoring coming soon...</p>
-            </CardContent>
-          </Card>
-        );
+        return <CompliancePage />;
       case 'reports':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Detailed valuation and risk reports coming soon...</p>
-            </CardContent>
-          </Card>
-        );
+        return <ReportsPage />;
       case 'pricing':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Pricing</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Pricing plans and billing information coming soon...</p>
-            </CardContent>
-          </Card>
-        );
+        return <PricingPage />;
       default:
         return null;
     }
