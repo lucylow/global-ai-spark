@@ -1,13 +1,212 @@
+"""
+Blockchain and NFT routes for PropGuard AI
+"""
 from flask import Blueprint, request, jsonify
+from datetime import datetime
 import hashlib
 import json
-import time
-import random
-from datetime import datetime
-from typing import Dict, List, Optional
+import sys
+import os
 
+# Add the parent directory to sys.path to import services
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from services.blockchain_service import blockchain_service
+from services.ipfs_service import ipfs_service
+
+# Create blueprint
 blockchain_bp = Blueprint('blockchain', __name__)
 
+@blockchain_bp.route('/blockchain-health', methods=['GET'])
+def get_blockchain_health():
+    """Get blockchain network health status"""
+    try:
+        health_data = blockchain_service.get_blockchain_health()
+        return jsonify(health_data)
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@blockchain_bp.route('/mint-valuation-nft', methods=['POST'])
+def mint_valuation_nft():
+    """Mint a new NFT for property valuation"""
+    try:
+        data = request.get_json()
+        property_data = data.get('property_data', {})
+        valuation_data = data.get('valuation_data', {})
+        
+        if not property_data or not valuation_data:
+            return jsonify({
+                "success": False,
+                "error": "Missing property_data or valuation_data"
+            }), 400
+        
+        # Mint the NFT
+        result = blockchain_service.mint_valuation_nft(property_data, valuation_data)
+        
+        if result.get('success'):
+            return jsonify(result)
+        else:
+            return jsonify(result), 500
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@blockchain_bp.route('/verify-nft', methods=['POST'])
+def verify_nft():
+    """Verify an NFT by token ID or transaction hash"""
+    try:
+        data = request.get_json()
+        identifier = data.get('identifier', '')  # token_id or tx_hash
+        
+        if not identifier:
+            return jsonify({
+                "success": False,
+                "error": "Missing identifier (token_id or tx_hash)"
+            }), 400
+        
+        result = blockchain_service.verify_nft(identifier)
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@blockchain_bp.route('/opensea-metadata/<token_id>', methods=['GET'])
+def get_opensea_metadata(token_id):
+    """Get OpenSea-compatible metadata for NFT"""
+    try:
+        # In production, fetch this from blockchain/IPFS
+        # For now, return mock data
+        metadata = {
+            "name": f"PropGuard Valuation Certificate #{token_id}",
+            "description": "Blockchain-verified property valuation certificate with APRA compliance",
+            "external_url": "https://propguard.ai",
+            "image": f"https://propguard.ai/api/nft-image/{token_id}",
+            "attributes": [
+                {
+                    "trait_type": "Property Type",
+                    "value": "Residential"
+                },
+                {
+                    "trait_type": "Valuation (AUD)",
+                    "value": 850000
+                },
+                {
+                    "trait_type": "Risk Score",
+                    "value": 15
+                },
+                {
+                    "trait_type": "APRA Compliant",
+                    "value": "Yes"
+                },
+                {
+                    "trait_type": "Network",
+                    "value": "Polygon"
+                }
+            ],
+            "background_color": "1a365d"
+        }
+        
+        return jsonify(metadata)
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@blockchain_bp.route('/nft-collection', methods=['GET'])
+def get_nft_collection():
+    """Get collection of minted NFTs"""
+    try:
+        # Mock collection data
+        collection = {
+            "success": True,
+            "total_minted": 1247,
+            "total_volume_aud": 850000000,
+            "recent_mints": [
+                {
+                    "token_id": 1247,
+                    "property_address": "123 Collins Street, Melbourne VIC",
+                    "valuation": 850000,
+                    "minted_at": "2024-01-08T10:30:00Z",
+                    "opensea_url": "https://opensea.io/assets/matic/0x.../1247"
+                },
+                {
+                    "token_id": 1246,
+                    "property_address": "456 George Street, Sydney NSW",
+                    "valuation": 1200000,
+                    "minted_at": "2024-01-08T09:15:00Z",
+                    "opensea_url": "https://opensea.io/assets/matic/0x.../1246"
+                }
+            ]
+        }
+        
+        return jsonify(collection)
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@blockchain_bp.route('/apra-compliance-report', methods=['POST'])
+def generate_apra_compliance_report():
+    """Generate APRA compliance report for property"""
+    try:
+        data = request.get_json()
+        property_id = data.get('property_id', '')
+        
+        if not property_id:
+            return jsonify({
+                "success": False,
+                "error": "Missing property_id"
+            }), 400
+        
+        # Generate compliance report
+        compliance_report = {
+            "success": True,
+            "property_id": property_id,
+            "compliance_status": {
+                "APRA_CPS230": True,
+                "NCCP_Act": True,
+                "Basel_III": True,
+                "Risk_Management": True
+            },
+            "audit_trail": {
+                "valuation_methodology": "AI-powered distributed consensus",
+                "data_sources": ["CoreLogic", "Domain", "XNode Network"],
+                "verification_nodes": 3,
+                "consensus_score": 0.92,
+                "last_updated": datetime.now().isoformat()
+            },
+            "certification": {
+                "certified_by": "PropGuard AI",
+                "certification_date": datetime.now().isoformat(),
+                "valid_until": "2025-01-08T00:00:00Z",
+                "certificate_hash": hashlib.sha256(f"propguard-{property_id}-{datetime.now()}".encode()).hexdigest()
+            }
+        }
+        
+        return jsonify(compliance_report)
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+# Legacy endpoints (keeping for backwards compatibility)
 class MockBlockchain:
     """Mock blockchain implementation for demonstration"""
     
