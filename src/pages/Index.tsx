@@ -9,7 +9,10 @@ import PropertyNFTMinter from '@/components/PropertyNFTMinter';
 import NFTVerifier from '@/components/NFTVerifier';
 import ValuationReport from '@/components/ValuationReport';
 import Web3Monetization from '@/components/Web3Monetization';
+import { PropertyAnalytics } from '@/components/PropertyAnalytics';
+import { SystemHealth } from '@/components/SystemHealth';
 import { Badge } from '@/components/ui/badge';
+import { propGuardAPI } from '@/config/api';
 import { Shield, Building, TrendingUp, BarChart3, Map, FileText, Coins, Menu, X, CheckCircle, AlertTriangle, Clock, Search } from 'lucide-react';
 
 interface PropertyData {
@@ -54,6 +57,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [auditLog, setAuditLog] = useState<any[]>([]);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [riskLayers, setRiskLayers] = useState({
     flood: true,
     fire: true,
@@ -85,11 +89,61 @@ const Index = () => {
     setAuditLog(prev => [auditEntry, ...prev]);
     
     try {
-      // Simulate API call with demo data
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate demo property data based on command
-      const demoData: PropertyData = {
+      // Try to use real API first, fall back to demo data
+      try {
+        const [propertyAnalysis, sentiment, marketData] = await Promise.allSettled([
+          propGuardAPI.analyzeProperty(command),
+          propGuardAPI.getPropertySentiment(command),
+          propGuardAPI.getMarketSentiment({ location: command })
+        ]);
+
+        const result = {
+          property: propertyAnalysis.status === 'fulfilled' ? propertyAnalysis.value : null,
+          sentiment: sentiment.status === 'fulfilled' ? sentiment.value : null,
+          market: marketData.status === 'fulfilled' ? marketData.value : null
+        };
+
+        setAnalysisResult(result);
+        
+        // Convert to legacy format for existing components
+        if (result.property) {
+          const property = result.property as any;
+          const legacyData: PropertyData = {
+            address: property.address || command,
+            valuation: property.valuation || property.analysis_result?.current_valuation || 0,
+            riskScore: property.analysis_result?.risk_score || 0,
+            climateRisk: property.analysis_result?.climate_risk || 'Medium',
+            lvrRatio: property.analysis_result?.lvr || 0.65,
+            story: property.story || "AI-powered analysis complete",
+            sentiment: (result.sentiment as any)?.sentiment_analysis,
+            risk: property.risk || {
+              flood: Math.random() * 0.8,
+              fire: Math.random() * 0.7,
+              coastalErosion: Math.random() * 0.3,
+              subsidence: Math.random() * 0.4,
+              market: Math.random() * 0.6
+            },
+            compliance: property.compliance || {
+              status: 'APPROVED' as const,
+              reasons: ['APRA CPS 230 compliant'],
+              lvr: property.analysis_result?.lvr || 0.65,
+              dti: 4.5,
+              apraCompliance: {
+                aps220: 'COMPLIANT',
+                aps221: 'COMPLIANT',
+                prudentialStandards: 'VERIFIED',
+                lastAudit: new Date('2024-01-15'),
+                nextReview: new Date('2024-07-15')
+              }
+            }
+          };
+          setPropertyData(legacyData);
+        }
+      } catch (apiError) {
+        console.warn('API call failed, using demo data:', apiError);
+        
+        // Generate demo property data based on command
+        const demoData: PropertyData = {
         address: command.includes('Sydney') ? '123 Harbour St, Sydney NSW 2000' : 
                 command.includes('Melbourne') ? '456 Collins St, Melbourne VIC 3000' :
                 command.includes('Brisbane') ? '789 Queen St, Brisbane QLD 4000' :
@@ -133,6 +187,8 @@ const Index = () => {
       };
       
       setPropertyData(demoData);
+      setAnalysisResult({ property: demoData, sentiment: null, market: null });
+      }
       
       // Update audit log
       setAuditLog(prev => prev.map(entry => 
@@ -290,6 +346,9 @@ const Index = () => {
           </form>
         </motion.div>
 
+        {/* System Health Status */}
+        <SystemHealth className="mb-8" />
+
         {/* Tab Content with Animations */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -338,18 +397,7 @@ const Index = () => {
                 
                 {/* Right Column - Metrics */}
                 <div className="space-y-6">
-                  <div className="bg-card rounded-xl shadow-lg p-6 border">
-                    <h2 className="text-xl font-semibold mb-4">Property Analytics</h2>
-                    {propertyData ? (
-                      <PropertyMetrics metrics={propertyData} />
-                    ) : (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Building className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <h3 className="text-lg font-medium mb-2">No Property Analyzed</h3>
-                        <p className="text-sm">Enter a property query to see AI-powered valuation metrics</p>
-                      </div>
-                    )}
-                  </div>
+                  <PropertyAnalytics analysisResult={analysisResult} />
                   
                   <MarketSentiment 
                     sentiment={propertyData?.sentiment} 
