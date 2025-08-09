@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropertyMap from '@/components/PropertyMap';
 import PropertyMetrics from '@/components/PropertyMetrics';
@@ -249,13 +250,13 @@ const Index = () => {
             </nav>
             
             <div className="flex items-center space-x-4">
-              <a 
-                href="/search" 
+              <Link 
+                to="/search" 
                 className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
               >
                 <Search className="w-4 h-4" />
                 Property Search
-              </a>
+              </Link>
               <Badge variant="secondary" className="hidden sm:flex">
                 <Shield className="w-3 h-3 mr-1" />
                 APRA CPS 230 Compliant
@@ -355,8 +356,8 @@ const Index = () => {
 
         {/* Quick Navigation Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <a 
-            href="/search" 
+          <Link 
+            to="/search" 
             className="group bg-card rounded-xl shadow-lg p-6 border hover:shadow-xl transition-all cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
@@ -364,10 +365,10 @@ const Index = () => {
               <h3 className="text-lg font-semibold">Property Search</h3>
             </div>
             <p className="text-muted-foreground">Search Australian properties with AI-powered analysis and real market data</p>
-          </a>
+          </Link>
           
-          <a 
-            href="/market-analysis" 
+          <Link 
+            to="/market-analysis" 
             className="group bg-card rounded-xl shadow-lg p-6 border hover:shadow-xl transition-all cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
@@ -375,7 +376,7 @@ const Index = () => {
               <h3 className="text-lg font-semibold">Market Analysis</h3>
             </div>
             <p className="text-muted-foreground">Get comprehensive market insights and trends for any location</p>
-          </a>
+          </Link>
           
           <div className="bg-card rounded-xl shadow-lg p-6 border">
             <div className="flex items-center gap-3 mb-3">
