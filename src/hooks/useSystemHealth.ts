@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { propGuardAPI } from '@/services/api/propguard';
+import { getCollinsStreetSystemHealth } from '@/data/mockData';
 
 interface SystemHealth {
   propguard: any;
@@ -16,10 +17,14 @@ export const useSystemHealth = () => {
   const checkHealth = useCallback(async () => {
     setIsLoading(true);
     try {
-      const healthData = await propGuardAPI.checkSystemHealth();
+      // Use mock health data for demo purposes
+      const healthData = getCollinsStreetSystemHealth();
       setHealth(healthData);
     } catch (error) {
       console.error('Health check failed:', error);
+      // Fallback to mock data
+      const healthData = getCollinsStreetSystemHealth();
+      setHealth(healthData);
     } finally {
       setIsLoading(false);
     }

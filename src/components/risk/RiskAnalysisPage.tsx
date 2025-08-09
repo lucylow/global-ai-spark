@@ -3,20 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import RiskHeatmap from '../RiskHeatmap';
+import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
 
 export const RiskAnalysisPage: React.FC = () => {
-  const riskData = {
-    floodRisk: { score: 66, level: 'High', color: 'destructive' },
-    fireRisk: { score: 24, level: 'Low', color: 'secondary' },
-    erosionRisk: { score: 22, level: 'Low', color: 'secondary' },
-    cyclonesRisk: { score: 10, level: 'Very Low', color: 'secondary' }
-  };
-
-  const climateProjections = [
-    { year: '2030', temp: '+1.2°C', rainfall: '-5%', seaLevel: '+8cm' },
-    { year: '2050', temp: '+2.1°C', rainfall: '-12%', seaLevel: '+18cm' },
-    { year: '2070', temp: '+3.0°C', rainfall: '-18%', seaLevel: '+32cm' }
-  ];
+  // Use Collins Street mock data
+  const riskData = COLLINS_STREET_MOCK_DATA.riskData;
+  const climateProjections = COLLINS_STREET_MOCK_DATA.climateProjections;
+  const riskMitigation = COLLINS_STREET_MOCK_DATA.riskMitigation;
 
   return (
     <div className="space-y-6">
@@ -87,22 +80,35 @@ export const RiskAnalysisPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="border-l-4 border-destructive pl-4">
-              <h4 className="font-semibold text-destructive">High Priority: Flood Risk</h4>
-              <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>• Install flood barriers and drainage systems</li>
-                <li>• Consider flood insurance coverage increase</li>
-                <li>• Elevate critical infrastructure above flood levels</li>
-              </ul>
-            </div>
-            <div className="border-l-4 border-yellow-500 pl-4">
-              <h4 className="font-semibold text-yellow-600">Medium Priority: Fire Risk</h4>
-              <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>• Maintain defensible space around property</li>
-                <li>• Install fire-resistant building materials</li>
-                <li>• Implement early warning systems</li>
-              </ul>
-            </div>
+            {riskMitigation.map((mitigation, index) => (
+              <div 
+                key={index}
+                className={`border-l-4 pl-4 ${
+                  mitigation.priority === 'High' 
+                    ? 'border-destructive' 
+                    : 'border-yellow-500'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className={`font-semibold ${
+                    mitigation.priority === 'High' 
+                      ? 'text-destructive' 
+                      : 'text-yellow-600'
+                  }`}>
+                    {mitigation.priority} Priority: {mitigation.type}
+                  </h4>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium">Cost: {mitigation.cost}</span>
+                    <span className="ml-2">ROI: {mitigation.roi}</span>
+                  </div>
+                </div>
+                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                  {mitigation.actions.map((action, actionIndex) => (
+                    <li key={actionIndex}>• {action}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

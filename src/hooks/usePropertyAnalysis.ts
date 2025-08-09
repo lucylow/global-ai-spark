@@ -1,6 +1,12 @@
 import { useState, useCallback } from 'react';
 import { propGuardAPI } from '@/services/api/propguard';
 import { PropertyAnalysis, SentimentAnalysis, MarketSentiment } from '@/types/property';
+import { 
+  isCollinsStreetAddress, 
+  getCollinsStreetPropertyAnalysis, 
+  getCollinsStreetSentiment, 
+  getCollinsStreetMarketSentiment 
+} from '@/data/mockData';
 
 export const usePropertyAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,24 +20,35 @@ export const usePropertyAnalysis = () => {
     setError(null);
 
     try {
-      const [propertyResult, sentimentResult, marketResult] = await Promise.allSettled([
-        propGuardAPI.analyzeProperty(query),
-        propGuardAPI.getPropertySentiment(query),
-        propGuardAPI.getMarketSentiment({ location: query })
-      ]);
+      // Check if this is Collins Street address and use mock data
+      if (isCollinsStreetAddress(query)) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        setAnalysis(getCollinsStreetPropertyAnalysis());
+        setSentiment(getCollinsStreetSentiment());
+        setMarketSentiment(getCollinsStreetMarketSentiment());
+      } else {
+        // Use real API for other addresses
+        const [propertyResult, sentimentResult, marketResult] = await Promise.allSettled([
+          propGuardAPI.analyzeProperty(query),
+          propGuardAPI.getPropertySentiment(query),
+          propGuardAPI.getMarketSentiment({ location: query })
+        ]);
 
-      if (propertyResult.status === 'fulfilled') {
-        setAnalysis(propertyResult.value as PropertyAnalysis);
-      }
+        if (propertyResult.status === 'fulfilled') {
+          setAnalysis(propertyResult.value as PropertyAnalysis);
+        }
 
-      if (sentimentResult.status === 'fulfilled') {
-        const result = sentimentResult.value as any;
-        setSentiment(result.sentiment_analysis);
-      }
+        if (sentimentResult.status === 'fulfilled') {
+          const result = sentimentResult.value as any;
+          setSentiment(result.sentiment_analysis);
+        }
 
-      if (marketResult.status === 'fulfilled') {
-        const result = marketResult.value as any;
-        setMarketSentiment(result.market_sentiment);
+        if (marketResult.status === 'fulfilled') {
+          const result = marketResult.value as any;
+          setMarketSentiment(result.market_sentiment);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed');
