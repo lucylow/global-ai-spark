@@ -31,8 +31,7 @@ PropGuard AI is an advanced property risk assessment and valuation platform that
   - PostCSS with Tailwind CSS processing
 - **Testing**: Vitest + React Testing Library (configured)
 
-### Backend Infrastructure (Manus Space + Supabase)
-- **Primary API**: https://9yhyi3c8nkjv.manus.space/api (Manus microservices)
+### Backend Infrastructure
 - **Database**: Supabase PostgreSQL with Row Level Security (RLS)
 - **Edge Functions**: Deno-based serverless functions
 - **Real-time**: Supabase Realtime for live updates
@@ -188,7 +187,6 @@ cd ..
 
 # Start development servers
 bun dev          # Frontend on http://localhost:8080
-# Python backend on https://9yhyi3c8nkjv.manus.space (already deployed)
 
 # Build for production
 bun run build   # Generates optimized production bundle
@@ -203,7 +201,6 @@ VITE_APP_NAME=PropGuard AI
 VITE_APP_VERSION=1.0.0
 
 # API Configuration
-VITE_API_BASE_URL=https://9yhyi3c8nkjv.manus.space/api
 VITE_SUPABASE_URL=https://mpbwpixpuonkczxgkjks.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
@@ -1026,7 +1023,6 @@ chore(deps): upgrade React to 18.3.1
 ### Contact
 - **GitHub Issues**: https://github.com/lucylow/global-ai-spark/issues
 - **Live Demo**: https://propguard-ai-openxai.lovable.app/
-- **Backend API**: https://9yhyi3c8nkjv.manus.space
 
 ## 📄 License
 
