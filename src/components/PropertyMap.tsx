@@ -51,8 +51,12 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
 
     const initializeMap = async () => {
       try {
+        console.log('Initializing map...');
+        
         // Get Mapbox token from Supabase edge function
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        
+        console.log('Mapbox token response:', { data, error });
         
         if (error) {
           console.error('Error fetching Mapbox token:', error);
@@ -61,11 +65,14 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
         }
 
         if (data?.token) {
+          console.log('Setting Mapbox access token');
           mapboxgl.accessToken = data.token;
           setMapboxToken(data.token);
 
           // Initialize the map
           const coordinates = property?.coordinates || { lat: -37.8136, lng: 144.9631 }; // Melbourne CBD default
+          
+          console.log('Creating map with coordinates:', coordinates);
           
           map.current = new mapboxgl.Map({
             container: mapContainer.current,
@@ -88,13 +95,16 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
             ))
             .addTo(map.current);
 
-          // Add risk overlays if data exists
-          if (property?.riskData || riskData) {
-            const currentRiskData = property?.riskData || riskData;
+          // Add map load event listener
+          map.current.on('load', () => {
+            console.log('Map loaded successfully');
             
-            // Add flood risk overlay
-            if (currentRiskData.flood && currentRiskData.flood > 30) {
-              map.current.on('load', () => {
+            // Add risk overlays if data exists
+            if (property?.riskData || riskData) {
+              const currentRiskData = property?.riskData || riskData;
+              
+              // Add flood risk overlay
+              if (currentRiskData.flood && currentRiskData.flood > 30) {
                 map.current!.addSource('flood-risk', {
                   type: 'geojson',
                   data: {
@@ -119,9 +129,18 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
                     'circle-stroke-color': '#1e40af'
                   }
                 });
-              });
+              }
             }
-          }
+          });
+
+          map.current.on('error', (e) => {
+            console.error('Map error:', e);
+          });
+
+          console.log('Map initialization complete');
+        } else {
+          console.error('No token received from edge function');
+          setIsLoading(false);
         }
         
         setIsLoading(false);
