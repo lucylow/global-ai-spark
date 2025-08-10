@@ -19,9 +19,7 @@ export const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { 
     isLoading, 
-    analysis, 
-    sentiment, 
-    marketSentiment, 
+    analysis,
     error, 
     analyzeProperty 
   } = usePropertyAnalysis();
@@ -52,13 +50,13 @@ export const Dashboard: React.FC = () => {
                 <PropertyAnalytics 
                   analysisResult={{
                     property: analysis ? { analysis_result: analysis } : null,
-                    sentiment: sentiment ? { sentiment_analysis: sentiment } : null
+                    sentiment: null
                   }}
                 />
                 <MarketSentiment 
-                  sentiment={marketSentiment ? {
-                    score: marketSentiment.sentiment_score,
-                    magnitude: marketSentiment.confidence,
+                  sentiment={analysis?.property?.propguard_market_sentiment ? {
+                    score: analysis.property.propguard_market_sentiment.sentiment_score,
+                    magnitude: analysis.property.propguard_market_sentiment.confidence,
                     keywords: []
                   } : undefined}
                   isLoading={isLoading}

@@ -1,76 +1,82 @@
-import { useState, useCallback } from 'react';
-import { propGuardAPI } from '@/services/api/propguard';
-import { PropertyAnalysis, SentimentAnalysis, MarketSentiment } from '@/types/property';
-import { 
-  isCollinsStreetAddress, 
-  getCollinsStreetPropertyAnalysis, 
-  getCollinsStreetSentiment, 
-  getCollinsStreetMarketSentiment 
-} from '@/data/mockData';
+import { useState } from 'react';
+import { propGuardIntegration, EnhancedPropertyAnalysis } from '@/services/propguard-integration';
+import { toast } from 'sonner';
 
 export const usePropertyAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<PropertyAnalysis | null>(null);
-  const [sentiment, setSentiment] = useState<SentimentAnalysis | null>(null);
-  const [marketSentiment, setMarketSentiment] = useState<MarketSentiment | null>(null);
+  const [analysis, setAnalysis] = useState<EnhancedPropertyAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const analyzeProperty = useCallback(async (query: string) => {
+  const analyzeProperty = async (address: string) => {
     setIsLoading(true);
     setError(null);
-
+    
     try {
-      // Check if this is Collins Street address and use mock data
-      if (isCollinsStreetAddress(query)) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        setAnalysis(getCollinsStreetPropertyAnalysis());
-        setSentiment(getCollinsStreetSentiment());
-        setMarketSentiment(getCollinsStreetMarketSentiment());
-      } else {
-        // Use real API for other addresses
-        const [propertyResult, sentimentResult, marketResult] = await Promise.allSettled([
-          propGuardAPI.analyzeProperty(query),
-          propGuardAPI.getPropertySentiment(query),
-          propGuardAPI.getMarketSentiment({ location: query })
-        ]);
-
-        if (propertyResult.status === 'fulfilled') {
-          setAnalysis(propertyResult.value as PropertyAnalysis);
-        }
-
-        if (sentimentResult.status === 'fulfilled') {
-          const result = sentimentResult.value as any;
-          setSentiment(result.sentiment_analysis);
-        }
-
-        if (marketResult.status === 'fulfilled') {
-          const result = marketResult.value as any;
-          setMarketSentiment(result.market_sentiment);
-        }
-      }
+      toast.info('Starting comprehensive property analysis...');
+      
+      const result = await propGuardIntegration.analyzeProperty(address);
+      setAnalysis(result);
+      
+      toast.success(`Analysis complete! PropGuard Score: ${result.propguard_score}/100`);
+      return result;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Analysis failed');
+      const errorMessage = err instanceof Error ? err.message : 'Analysis failed';
+      setError(errorMessage);
+      toast.error(`Analysis failed: ${errorMessage}`);
+      throw err;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const clearAnalysis = useCallback(() => {
-    setAnalysis(null);
-    setSentiment(null);
-    setMarketSentiment(null);
+  const searchProperties = async (params: any) => {
+    setIsLoading(true);
     setError(null);
-  }, []);
+    
+    try {
+      toast.info('Searching properties with enhanced data...');
+      
+      const results = await propGuardIntegration.searchPropertiesEnhanced(params);
+      
+      toast.success(`Found ${results.length} properties with enhanced data`);
+      return results;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Search failed';
+      setError(errorMessage);
+      toast.error(`Search failed: ${errorMessage}`);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getMarketAnalysis = async (location: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      toast.info('Analyzing market conditions...');
+      
+      const result = await propGuardIntegration.getMarketAnalysis(location);
+      
+      toast.success('Market analysis complete');
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Market analysis failed';
+      setError(errorMessage);
+      toast.error(`Market analysis failed: ${errorMessage}`);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     isLoading,
     analysis,
-    sentiment,
-    marketSentiment,
     error,
     analyzeProperty,
-    clearAnalysis
+    searchProperties,
+    getMarketAnalysis
   };
 };
