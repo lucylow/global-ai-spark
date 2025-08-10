@@ -99,7 +99,12 @@ export const Dashboard: React.FC = () => {
                 <PropertyMap 
                   property={selectedProperty}
                 />
-                <EnhancedPropertyAnalytics />
+                <EnhancedPropertyAnalytics 
+                  analysis={analysis || propertyValuation}
+                  sentiment={sentiment}
+                  marketSentiment={marketSentiment}
+                  property={selectedProperty}
+                />
               </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground mt-8">

@@ -5,9 +5,28 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, AlertTriangle, DollarSign, Target, Calendar } from 'lucide-react';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
+import { PropertyAnalysis, SentimentAnalysis, MarketSentiment } from '@/types/property';
 
-export const EnhancedPropertyAnalytics = () => {
-  const data = COLLINS_STREET_MOCK_DATA;
+interface EnhancedPropertyAnalyticsProps {
+  analysis?: PropertyAnalysis | null;
+  sentiment?: SentimentAnalysis | null;
+  marketSentiment?: MarketSentiment | null;
+  property?: any;
+}
+
+export const EnhancedPropertyAnalytics: React.FC<EnhancedPropertyAnalyticsProps> = ({ 
+  analysis, 
+  sentiment, 
+  marketSentiment, 
+  property 
+}) => {
+  // Use passed data if available, otherwise fallback to mock data
+  const data = analysis ? {
+    propertyAnalysis: analysis,
+    sentimentAnalysis: sentiment || COLLINS_STREET_MOCK_DATA.sentimentAnalysis,
+    marketSentiment: marketSentiment || COLLINS_STREET_MOCK_DATA.marketSentiment,
+    confidenceGrowth: COLLINS_STREET_MOCK_DATA.confidenceGrowth
+  } : COLLINS_STREET_MOCK_DATA;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AU', {
@@ -17,6 +36,21 @@ export const EnhancedPropertyAnalytics = () => {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  // Show loading state if no data is available
+  if (!data.propertyAnalysis) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <Card className="lg:col-span-3">
+          <CardContent className="py-12 text-center">
+            <div className="text-muted-foreground">
+              No property analysis data available. Please analyze a property to view detailed analytics.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
