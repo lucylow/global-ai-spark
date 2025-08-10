@@ -1,11 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Waves, Flame, Mountain, Navigation } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Waves, Flame, Mountain, Navigation, MapPin, Plus, Minus } from 'lucide-react';
 
 interface PropertyMapProps {
   property?: {
@@ -39,125 +36,10 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
     erosion: false
   }
 }) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
   const [zoom, setZoom] = useState(15);
+  const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
 
-  // Initialize Mapbox when component mounts
-  useEffect(() => {
-    if (!mapContainer.current) return;
-
-    const initializeMap = async () => {
-      try {
-        console.log('Initializing map...');
-        
-        // Get Mapbox token from Supabase edge function
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        console.log('Mapbox token response:', { data, error });
-        
-        if (error) {
-          console.error('Error fetching Mapbox token:', error);
-          setIsLoading(false);
-          return;
-        }
-
-        if (data?.token) {
-          console.log('Setting Mapbox access token');
-          mapboxgl.accessToken = data.token;
-          setMapboxToken(data.token);
-
-          // Initialize the map
-          const coordinates = property?.coordinates || { lat: -37.8136, lng: 144.9631 }; // Melbourne CBD default
-          
-          console.log('Creating map with coordinates:', coordinates);
-          
-          map.current = new mapboxgl.Map({
-            container: mapContainer.current,
-            style: 'mapbox://styles/mapbox/streets-v12',
-            center: [coordinates.lng, coordinates.lat],
-            zoom: zoom
-          });
-
-          // Add navigation controls
-          map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-          // Add property marker
-          new mapboxgl.Marker({ color: '#ef4444' })
-            .setLngLat([coordinates.lng, coordinates.lat])
-            .setPopup(new mapboxgl.Popup().setHTML(
-              `<div class="p-2">
-                <h3 class="font-semibold">${property?.address || '123 Collins Street'}</h3>
-                <p class="text-sm text-gray-600">Property Location</p>
-              </div>`
-            ))
-            .addTo(map.current);
-
-          // Add map load event listener
-          map.current.on('load', () => {
-            console.log('Map loaded successfully');
-            
-            // Add risk overlays if data exists
-            if (property?.riskData || riskData) {
-              const currentRiskData = property?.riskData || riskData;
-              
-              // Add flood risk overlay
-              if (currentRiskData.flood && currentRiskData.flood > 30) {
-                map.current!.addSource('flood-risk', {
-                  type: 'geojson',
-                  data: {
-                    type: 'Feature',
-                    geometry: {
-                      type: 'Point',
-                      coordinates: [coordinates.lng, coordinates.lat]
-                    },
-                    properties: {}
-                  }
-                });
-                
-                map.current!.addLayer({
-                  id: 'flood-risk-circle',
-                  type: 'circle',
-                  source: 'flood-risk',
-                  paint: {
-                    'circle-radius': currentRiskData.flood! * 2,
-                    'circle-color': '#3b82f6',
-                    'circle-opacity': 0.3,
-                    'circle-stroke-width': 2,
-                    'circle-stroke-color': '#1e40af'
-                  }
-                });
-              }
-            }
-          });
-
-          map.current.on('error', (e) => {
-            console.error('Map error:', e);
-          });
-
-          console.log('Map initialization complete');
-        } else {
-          console.error('No token received from edge function');
-          setIsLoading(false);
-        }
-        
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error initializing map:', error);
-        setIsLoading(false);
-      }
-    };
-
-    initializeMap();
-
-    return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-    };
-  }, [property, zoom]);
+  const coordinates = property?.coordinates || { lat: -37.8136, lng: 144.9631 };
 
   const getRiskColor = (score: number) => {
     if (score >= 70) return 'text-red-600 bg-red-100';
@@ -199,16 +81,57 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
     return risks.filter(risk => risk.active && risk.value > 20);
   };
 
-  if (isLoading) {
-    return (
-      <div className="w-full h-[500px] flex items-center justify-center bg-gray-100 rounded-xl">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading map...</p>
+  // Google Maps style component
+  const GoogleMapsStyle = () => (
+    <div className="w-full h-96 relative bg-gradient-to-br from-green-100 to-blue-100 rounded overflow-hidden">
+      {/* Grid pattern to simulate map */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="grid grid-cols-12 grid-rows-12 h-full w-full">
+          {Array.from({ length: 144 }).map((_, i) => (
+            <div key={i} className="border border-gray-300"></div>
+          ))}
         </div>
       </div>
-    );
-  }
+
+      {/* Streets overlay */}
+      <svg className="absolute inset-0 w-full h-full">
+        {/* Main roads */}
+        <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#d1d5db" strokeWidth="3" />
+        <line x1="50%" y1="0" x2="50%" y2="100%" stroke="#d1d5db" strokeWidth="3" />
+        <line x1="0" y1="25%" x2="100%" y2="25%" stroke="#e5e7eb" strokeWidth="2" />
+        <line x1="0" y1="75%" x2="100%" y2="75%" stroke="#e5e7eb" strokeWidth="2" />
+        <line x1="25%" y1="0" x2="25%" y2="100%" stroke="#e5e7eb" strokeWidth="2" />
+        <line x1="75%" y1="0" x2="75%" y2="100%" stroke="#e5e7eb" strokeWidth="2" />
+      </svg>
+
+      {/* Property marker */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <div className="relative">
+          <MapPin className="h-8 w-8 text-red-500 drop-shadow-lg" fill="currentColor" />
+          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded shadow-lg text-xs font-medium whitespace-nowrap">
+            {property?.address || '123 Collins Street'}
+          </div>
+        </div>
+      </div>
+
+      {/* Risk overlays */}
+      {(property?.riskData || riskData) && (
+        <>
+          {(property?.riskData?.flood || riskData?.flood || 0) > 30 && activeLayers.flood && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-500 opacity-20 rounded-full animate-pulse"></div>
+          )}
+          {(property?.riskData?.fire || riskData?.fire || 0) > 30 && activeLayers.fire && (
+            <div className="absolute top-1/3 left-1/3 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-orange-500 opacity-20 rounded-full"></div>
+          )}
+        </>
+      )}
+
+      {/* Map type indicator */}
+      <div className="absolute bottom-4 left-4 bg-white rounded px-2 py-1 text-xs shadow">
+        {mapType === 'roadmap' ? 'Map' : 'Satellite'}
+      </div>
+    </div>
+  );
 
   const activeRisks = generateRiskVisualization();
 
@@ -224,11 +147,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
         </CardHeader>
         <CardContent className="p-0">
           <div className="relative">
-            <div 
-              ref={mapContainer}
-              className="w-full h-96 relative bg-gray-200 rounded overflow-hidden"
-              style={{ minHeight: '400px' }}
-            />
+            <GoogleMapsStyle />
 
             {/* Google Maps-style controls */}
             <div className="absolute top-4 right-4 flex flex-col space-y-2">
@@ -238,13 +157,23 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
                   onClick={() => setZoom(Math.min(zoom + 1, 20))}
                   className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 border-b border-gray-200 rounded-t-lg"
                 >
-                  <span className="text-lg font-bold text-gray-600">+</span>
+                  <Plus className="h-4 w-4 text-gray-600" />
                 </button>
                 <button 
                   onClick={() => setZoom(Math.max(zoom - 1, 1))}
                   className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-b-lg"
                 >
-                  <span className="text-lg font-bold text-gray-600">−</span>
+                  <Minus className="h-4 w-4 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Map type toggle */}
+              <div className="bg-white rounded-lg shadow-lg border border-gray-200">
+                <button 
+                  onClick={() => setMapType(mapType === 'roadmap' ? 'satellite' : 'roadmap')}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-lg text-xs font-medium text-gray-600"
+                >
+                  {mapType === 'roadmap' ? 'SAT' : 'MAP'}
                 </button>
               </div>
             </div>
