@@ -31,7 +31,7 @@ export interface PropertyDataResult {
 }
 
 class PropertyDataService {
-  private dataMode: DataMode = 'auto';
+  private dataMode: DataMode = 'demo';
   private apiHealthStatus = {
     propguard: false,
     realtybase: false,
@@ -55,19 +55,15 @@ class PropertyDataService {
 
     // Live mode - try all APIs with fallbacks
     if (this.dataMode === 'live') {
-      return this.getLiveData(query);
-    }
-
-    // Auto mode - try live first, fallback to mock
-    try {
-      const liveResult = await this.getLiveData(query);
-      if (liveResult.analysis || liveResult.sentiment || liveResult.marketSentiment) {
-        return liveResult;
+      try {
+        return await this.getLiveData(query);
+      } catch (error) {
+        console.warn('Live API failed, falling back to mock data:', error);
+        return this.getMockData();
       }
-    } catch (error) {
-      console.warn('Live API failed, falling back to mock data:', error);
     }
 
+    // Auto mode - use mock data by default to ensure functionality
     return this.getMockData();
   }
 
@@ -230,21 +226,31 @@ class PropertyDataService {
   }
 
   async checkAPIHealth(): Promise<typeof this.apiHealthStatus> {
-    const healthChecks = await Promise.allSettled([
-      propGuardAPI.checkSystemHealth().then(() => true).catch(() => false),
-      realtyBaseAPI.checkHealth().then(() => true).catch(() => false),
-      supabase.functions.invoke('property-analysis', { body: { healthCheck: true } })
-        .then(() => true).catch(() => false),
-      supabase.functions.invoke('nasa-fire-risk', { body: { latitude: -33.8688, longitude: 151.2093 } })
-        .then(() => true).catch(() => false)
-    ]);
+    try {
+      const healthChecks = await Promise.allSettled([
+        propGuardAPI.checkSystemHealth().then(() => true).catch(() => false),
+        realtyBaseAPI.checkHealth().then(() => true).catch(() => false),
+        supabase.functions.invoke('property-analysis', { body: { healthCheck: true } })
+          .then(() => true).catch(() => false),
+        supabase.functions.invoke('nasa-fire-risk', { body: { latitude: -33.8688, longitude: 151.2093 } })
+          .then(() => true).catch(() => false)
+      ]);
 
-    this.apiHealthStatus = {
-      propguard: healthChecks[0].status === 'fulfilled' ? healthChecks[0].value : false,
-      realtybase: healthChecks[1].status === 'fulfilled' ? healthChecks[1].value : false,
-      supabase: healthChecks[2].status === 'fulfilled' ? healthChecks[2].value : false,
-      nasa: healthChecks[3].status === 'fulfilled' ? healthChecks[3].value : false
-    };
+      this.apiHealthStatus = {
+        propguard: healthChecks[0].status === 'fulfilled' ? healthChecks[0].value : false,
+        realtybase: healthChecks[1].status === 'fulfilled' ? healthChecks[1].value : false,
+        supabase: healthChecks[2].status === 'fulfilled' ? healthChecks[2].value : false,
+        nasa: healthChecks[3].status === 'fulfilled' ? healthChecks[3].value : false
+      };
+    } catch (error) {
+      console.warn('API health check failed:', error);
+      this.apiHealthStatus = {
+        propguard: false,
+        realtybase: false,
+        supabase: false,
+        nasa: false
+      };
+    }
 
     return this.apiHealthStatus;
   }

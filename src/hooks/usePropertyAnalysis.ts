@@ -9,7 +9,7 @@ export const usePropertyAnalysis = () => {
   const [marketSentiment, setMarketSentiment] = useState<MarketSentiment | null>(null);
   const [fireRisk, setFireRisk] = useState<FireRiskData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [dataMode, setDataMode] = useState<DataMode>('auto');
+  const [dataMode, setDataMode] = useState<DataMode>('demo');
   const [dataSource, setDataSource] = useState<string>('');
   const [apiHealth, setApiHealth] = useState<any>(null);
 
@@ -44,8 +44,13 @@ export const usePropertyAnalysis = () => {
   }, []);
 
   const checkAPIHealth = useCallback(async () => {
-    const health = await propertyDataService.checkAPIHealth();
-    setApiHealth(health);
+    try {
+      const health = await propertyDataService.checkAPIHealth();
+      setApiHealth(health);
+    } catch (error) {
+      console.error('Failed to check API health:', error);
+      setApiHealth({ propguard: false, realtybase: false, supabase: false, nasa: false });
+    }
   }, []);
 
   const handleDataModeChange = useCallback((mode: DataMode) => {
