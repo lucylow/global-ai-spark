@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PropertySearch } from './PropertySearch';
+import { PropertyDetails } from '@/components/PropertyDetails';
+import PropertyMap from '@/components/PropertyMap';
 import { SystemHealth } from '@/components/SystemHealth';
 import { DataModeToggle } from '@/components/DataModeToggle';
 import { EnhancedPropertyAnalytics } from '@/components/EnhancedPropertyAnalytics';
@@ -13,9 +15,12 @@ import { ReportsPage } from '../reports/ReportsPage';
 import { PricingPage } from '../pricing/PricingPage';
 import { usePropertyAnalysis } from '@/hooks/usePropertyAnalysis';
 import { useSystemHealth } from '@/hooks/useSystemHealth';
+import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
 
 export const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [propertyValuation, setPropertyValuation] = useState<any>(null);
   
   const { 
     isLoading, 
@@ -25,6 +30,35 @@ export const Dashboard: React.FC = () => {
     checkAPIHealth,
     setDataMode
   } = usePropertyAnalysis();
+
+  const handlePropertyAnalysis = (address: string, propertyData?: any) => {
+    console.log('Analyzing property:', address, propertyData);
+    setSelectedProperty(propertyData || { address });
+    
+    // Set mock valuation data for demo
+    if (address.toLowerCase().includes('collins street')) {
+      setPropertyValuation({
+        current_valuation: COLLINS_STREET_MOCK_DATA.propertyAnalysis.current_valuation,
+        confidence: COLLINS_STREET_MOCK_DATA.propertyAnalysis.confidence,
+        risk_score: COLLINS_STREET_MOCK_DATA.propertyAnalysis.risk_score,
+        analysis_result: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result
+      });
+      
+      // Add risk data to property
+      setSelectedProperty({
+        ...propertyData,
+        address,
+        coordinates: { lat: -37.8136, lng: 144.9631 },
+        riskData: {
+          flood: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result.risk.flood,
+          fire: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result.risk.fire,
+          coastal: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result.risk.coastalErosion
+        }
+      });
+    }
+    
+    analyzeProperty(address);
+  };
   
   React.useEffect(() => {
     checkAPIHealth();
@@ -34,6 +68,8 @@ export const Dashboard: React.FC = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
+    { id: 'property', label: 'Property Details' },
+    { id: 'map', label: 'Map & Risk' },
     { id: 'risk', label: 'Risk Analysis' },
     { id: 'blockchain', label: 'Blockchain' },
     { id: 'compliance', label: 'APRA Compliance' },
@@ -46,7 +82,7 @@ export const Dashboard: React.FC = () => {
       case 'dashboard':
         return (
           <>
-            <PropertySearch onAnalyze={analyzeProperty} isLoading={isLoading} />
+            <PropertySearch onAnalyze={handlePropertyAnalysis} isLoading={isLoading} />
             <DataModeToggle 
               dataMode={dataMode} 
               onModeChange={setDataMode} 
@@ -56,6 +92,27 @@ export const Dashboard: React.FC = () => {
               <EnhancedPropertyAnalytics />
             </div>
           </>
+        );
+      case 'property':
+        return selectedProperty ? (
+          <PropertyDetails 
+            property={selectedProperty} 
+            valuation={propertyValuation}
+          />
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Select a property to view details</p>
+          </div>
+        );
+      case 'map':
+        return selectedProperty ? (
+          <PropertyMap 
+            property={selectedProperty}
+          />
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Select a property to view map and risk analysis</p>
+          </div>
         );
       case 'risk':
         return <EnhancedRiskAnalysis />;
