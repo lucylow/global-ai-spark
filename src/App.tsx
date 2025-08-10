@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Dashboard } from "@/components/dashboard/Dashboard";
+import { EnhancedDashboard } from "@/components/propguard/EnhancedDashboard";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { PropertySearchPage } from "@/pages/PropertySearchPage";
 import { PropertyDetailPage } from "@/pages/PropertyDetailPage";
@@ -21,7 +22,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<EnhancedDashboard />} />
             <Route path="/search" element={<PropertySearchPage />} />
             <Route path="/property/:id" element={<PropertyDetailPage />} />
             <Route path="/market-analysis" element={<MarketAnalysisPage />} />
