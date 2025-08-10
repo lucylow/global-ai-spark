@@ -257,6 +257,35 @@ PropGuard AI represents a revolutionary approach to property risk assessment and
 - **Fault-Tolerant Architecture**: System continues operating even with node failures
 - **Global Scalability**: Designed to scale across international markets
 
+https://github.com/lucylow/global-ai-spark/blob/main/src/services/api/xnode.ts
+https://github.com/lucylow/global-ai-spark/blob/main/propguard-ai-backend/src/routes/xnode.py
+https://github.com/lucylow/global-ai-spark/blob/main/propguard-ai-backend/src/routes/xnode_simple.py
+
+"""
+// XNode Distributed Computing API
+import { propGuardAPI } from './propguard';
+
+export class XNodeAPI {
+  async getDistributedValuation(propertyData: any, comparables: any[], riskData: any, marketFactors: any) {
+    return propGuardAPI.getDistributedValuation(propertyData, comparables, riskData, marketFactors);
+  }
+
+  async getDistributedRiskAssessment(propertyData: any) {
+    return propGuardAPI.request('/xnode/distributed-risk-assessment', {
+      method: 'POST',
+      body: JSON.stringify({ property_data: propertyData })
+    });
+  }
+
+  async getXNodeHealth() {
+    return propGuardAPI.request('/xnode/xnode-health');
+  }
+}
+
+export const xnodeAPI = new XNodeAPI();
+"""
+
+
 **Community-Driven Development:**
 - **Developer Ecosystem**: Comprehensive APIs for third-party integrations
 - **Open Data Standards**: Promotes industry-wide data sharing and collaboration
