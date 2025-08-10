@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { APITestPanel } from '@/components/testing/APITestPanel';
 
 interface PropertySearchProps {
   onAnalyze: (query: string) => void;
@@ -26,10 +25,8 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({ onAnalyze, isLoa
   };
 
   return (
-    <>
-      <APITestPanel />
-      <Card>
-        <CardHeader>
+    <Card>
+      <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <span>🤖</span>
           <span>Property Intelligence Assistant</span>
@@ -96,6 +93,5 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({ onAnalyze, isLoa
         </div>
       </CardContent>
     </Card>
-    </>
   );
 };

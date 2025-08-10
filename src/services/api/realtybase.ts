@@ -125,22 +125,18 @@ export interface ValuationReport {
 }
 
 class RealtyBaseAPI {
-  private baseURL = 'https://mpbwpixpuonkczxgkjks.supabase.co/functions/v1';
+  private baseURL = ENV.API_BASE_URL;
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.baseURL}/realty-integration`;
+    const url = `${this.baseURL}/realty${endpoint}`;
     
     try {
       const response = await fetch(url, {
-        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
         },
-        body: JSON.stringify({
-          action: endpoint.replace('/', ''),
-          params: options.body ? JSON.parse(options.body as string) : {}
-        }),
+        ...options,
       });
 
       if (!response.ok) {
@@ -150,10 +146,10 @@ class RealtyBaseAPI {
       const data = await response.json();
       
       if (!data.success) {
-        throw new Error(data.error || 'API request failed');
+        throw new Error(data.message || data.error || 'API request failed');
       }
 
-      return data.data;
+      return data;
     } catch (error) {
       console.error('RealtyBase API Error:', error);
       throw error;
@@ -162,23 +158,22 @@ class RealtyBaseAPI {
 
   // Health check
   async checkHealth(): Promise<{ status: string; message: string }> {
-    return this.request('health', {});
+    return this.request('/health');
   }
 
   // Search properties with AI enhancement
   async searchProperties(params: PropertySearchParams): Promise<PropertyDetails[]> {
-    const response = await this.request<PropertyDetails[]>('search', {
+    const response = await this.request<{ properties: PropertyDetails[] }>('/search', {
+      method: 'POST',
       body: JSON.stringify(params),
     });
-    return response;
+    return response.properties;
   }
 
   // Get detailed property information with PropGuard AI analysis
   async getPropertyDetails(listingId: string): Promise<PropertyDetails> {
-    const response = await this.request<PropertyDetails>('property-details', {
-      body: JSON.stringify({ listingId }),
-    });
-    return response;
+    const response = await this.request<{ property_details: PropertyDetails }>(`/property/${listingId}`);
+    return response.property_details;
   }
 
   // Get property history and trends
