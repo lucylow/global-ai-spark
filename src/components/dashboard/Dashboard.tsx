@@ -8,6 +8,8 @@ import MarketSentiment from '@/components/MarketSentiment';
 import { RiskVisualization } from './RiskVisualization';
 import { SystemHealth } from '@/components/SystemHealth';
 import { DataModeToggle } from '@/components/DataModeToggle';
+import { FireRiskDisplay } from '@/components/FireRiskDisplay';
+import { NASAIntegrationStatus } from '@/components/NASAIntegrationStatus';
 import { RiskAnalysisPage } from '../risk/RiskAnalysisPage';
 import { BlockchainPage } from '../blockchain/BlockchainPage';
 import { CompliancePage } from '../compliance/CompliancePage';
@@ -23,7 +25,8 @@ export const Dashboard: React.FC = () => {
     isLoading, 
     analysis, 
     sentiment, 
-    marketSentiment, 
+    marketSentiment,
+    fireRisk,
     error,
     dataMode,
     dataSource,
@@ -80,11 +83,13 @@ export const Dashboard: React.FC = () => {
                   } : undefined}
                   isLoading={isLoading}
                 />
+                {fireRisk && <FireRiskDisplay fireRisk={fireRisk} />}
               </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SystemHealth />
+              <NASAIntegrationStatus />
             </div>
           </>
         );

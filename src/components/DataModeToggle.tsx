@@ -12,6 +12,7 @@ interface DataModeToggleProps {
     propguard: boolean;
     realtybase: boolean;
     supabase: boolean;
+    nasa: boolean;
   };
 }
 
@@ -102,10 +103,14 @@ export const DataModeToggle: React.FC<DataModeToggleProps> = ({
       {apiHealth && (
         <div className="space-y-2">
           <div className="text-xs text-muted-foreground">API Status:</div>
-          <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="flex items-center gap-1">
               <div className={`w-2 h-2 rounded-full ${apiHealth.supabase ? 'bg-success' : 'bg-destructive'}`} />
               Supabase
+            </div>
+            <div className="flex items-center gap-1">
+              <div className={`w-2 h-2 rounded-full ${apiHealth.nasa ? 'bg-success' : 'bg-destructive'}`} />
+              NASA FIRMS
             </div>
             <div className="flex items-center gap-1">
               <div className={`w-2 h-2 rounded-full ${apiHealth.propguard ? 'bg-success' : 'bg-destructive'}`} />

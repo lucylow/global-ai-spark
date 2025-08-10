@@ -1,12 +1,13 @@
 import { useState, useCallback } from 'react';
 import { PropertyAnalysis, SentimentAnalysis, MarketSentiment } from '@/types/property';
-import { propertyDataService, DataMode } from '@/services/propertyDataService';
+import { propertyDataService, DataMode, FireRiskData } from '@/services/propertyDataService';
 
 export const usePropertyAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<PropertyAnalysis | null>(null);
   const [sentiment, setSentiment] = useState<SentimentAnalysis | null>(null);
   const [marketSentiment, setMarketSentiment] = useState<MarketSentiment | null>(null);
+  const [fireRisk, setFireRisk] = useState<FireRiskData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dataMode, setDataMode] = useState<DataMode>('auto');
   const [dataSource, setDataSource] = useState<string>('');
@@ -23,6 +24,7 @@ export const usePropertyAnalysis = () => {
       setAnalysis(result.analysis);
       setSentiment(result.sentiment);
       setMarketSentiment(result.marketSentiment);
+      setFireRisk(result.fireRisk);
       setDataSource(result.dataSource);
       setError(result.error);
     } catch (err) {
@@ -36,6 +38,7 @@ export const usePropertyAnalysis = () => {
     setAnalysis(null);
     setSentiment(null);
     setMarketSentiment(null);
+    setFireRisk(null);
     setError(null);
     setDataSource('');
   }, []);
@@ -55,6 +58,7 @@ export const usePropertyAnalysis = () => {
     analysis,
     sentiment,
     marketSentiment,
+    fireRisk,
     error,
     dataMode,
     dataSource,

@@ -11,10 +11,21 @@ import {
 
 export type DataMode = 'demo' | 'live' | 'auto';
 
+export interface FireRiskData {
+  riskScore: number;
+  riskLevel: string;
+  nearbyFires: number;
+  closestFireDistance: number;
+  totalFRP: number;
+  dataSource: string;
+  lastUpdated: string;
+}
+
 export interface PropertyDataResult {
   analysis: PropertyAnalysis | null;
   sentiment: SentimentAnalysis | null;
   marketSentiment: MarketSentiment | null;
+  fireRisk: FireRiskData | null;
   dataSource: 'mock' | 'propguard' | 'realtybase' | 'supabase';
   error: string | null;
 }
@@ -24,7 +35,8 @@ class PropertyDataService {
   private apiHealthStatus = {
     propguard: false,
     realtybase: false,
-    supabase: true
+    supabase: true,
+    nasa: false
   };
 
   setDataMode(mode: DataMode) {
@@ -67,6 +79,15 @@ class PropertyDataService {
       analysis: getCollinsStreetPropertyAnalysis(),
       sentiment: getCollinsStreetSentiment(),
       marketSentiment: getCollinsStreetMarketSentiment(),
+      fireRisk: {
+        riskScore: 0.72,
+        riskLevel: 'High',
+        nearbyFires: 3,
+        closestFireDistance: 15.2,
+        totalFRP: 84.5,
+        dataSource: 'mock',
+        lastUpdated: new Date().toISOString()
+      },
       dataSource: 'mock',
       error: null
     };
@@ -95,6 +116,7 @@ class PropertyDataService {
       analysis: null,
       sentiment: null,
       marketSentiment: null,
+      fireRisk: null,
       dataSource: 'mock',
       error: `All APIs failed: ${errors.join(', ')}`
     };
@@ -102,16 +124,39 @@ class PropertyDataService {
 
   private async trySupabaseEdgeFunction(query: string): Promise<PropertyDataResult> {
     try {
-      const { data, error } = await supabase.functions.invoke('property-analysis', {
+      // Get property coordinates (mock for now, should be extracted from query)
+      const coords = this.extractCoordinates(query);
+      
+      // Call property analysis
+      const { data: analysisData, error: analysisError } = await supabase.functions.invoke('property-analysis', {
         body: { query }
       });
 
-      if (error) throw error;
+      if (analysisError) throw analysisError;
+
+      // Call NASA fire risk analysis
+      let fireRisk = null;
+      try {
+        const { data: fireData, error: fireError } = await supabase.functions.invoke('nasa-fire-risk', {
+          body: { 
+            latitude: coords.lat, 
+            longitude: coords.lng,
+            radiusKm: 50 
+          }
+        });
+
+        if (!fireError && fireData?.fireRisk) {
+          fireRisk = fireData.fireRisk;
+        }
+      } catch (fireErr) {
+        console.warn('Fire risk analysis failed:', fireErr);
+      }
 
       return {
-        analysis: data.analysis,
-        sentiment: data.sentiment,
-        marketSentiment: data.marketSentiment,
+        analysis: analysisData.analysis,
+        sentiment: analysisData.sentiment,
+        marketSentiment: analysisData.marketSentiment,
+        fireRisk,
         dataSource: 'supabase',
         error: null
       };
@@ -140,6 +185,7 @@ class PropertyDataService {
         analysis,
         sentiment,
         marketSentiment,
+        fireRisk: null, // PropGuard API doesn't provide NASA fire data
         dataSource: 'propguard',
         error: null
       };
@@ -174,6 +220,7 @@ class PropertyDataService {
         analysis,
         sentiment: null,
         marketSentiment: null,
+        fireRisk: null, // RealtyBase doesn't provide NASA fire data
         dataSource: 'realtybase',
         error: null
       };
@@ -187,13 +234,16 @@ class PropertyDataService {
       propGuardAPI.checkSystemHealth().then(() => true).catch(() => false),
       realtyBaseAPI.checkHealth().then(() => true).catch(() => false),
       supabase.functions.invoke('property-analysis', { body: { healthCheck: true } })
+        .then(() => true).catch(() => false),
+      supabase.functions.invoke('nasa-fire-risk', { body: { latitude: -33.8688, longitude: 151.2093 } })
         .then(() => true).catch(() => false)
     ]);
 
     this.apiHealthStatus = {
       propguard: healthChecks[0].status === 'fulfilled' ? healthChecks[0].value : false,
       realtybase: healthChecks[1].status === 'fulfilled' ? healthChecks[1].value : false,
-      supabase: healthChecks[2].status === 'fulfilled' ? healthChecks[2].value : false
+      supabase: healthChecks[2].status === 'fulfilled' ? healthChecks[2].value : false,
+      nasa: healthChecks[3].status === 'fulfilled' ? healthChecks[3].value : false
     };
 
     return this.apiHealthStatus;
@@ -201,6 +251,36 @@ class PropertyDataService {
 
   getAPIHealthStatus() {
     return this.apiHealthStatus;
+  }
+
+  // Helper function to extract coordinates from address query
+  private extractCoordinates(query: string): { lat: number; lng: number } {
+    // For Collins Street demo
+    if (isCollinsStreetAddress(query)) {
+      return { lat: -37.8136, lng: 144.9631 };
+    }
+    
+    // For other Australian cities (rough coordinates)
+    const cityCoords: Record<string, { lat: number; lng: number }> = {
+      'sydney': { lat: -33.8688, lng: 151.2093 },
+      'melbourne': { lat: -37.8136, lng: 144.9631 },
+      'brisbane': { lat: -27.4698, lng: 153.0251 },
+      'perth': { lat: -31.9505, lng: 115.8605 },
+      'adelaide': { lat: -34.9285, lng: 138.6007 },
+      'canberra': { lat: -35.2809, lng: 149.1300 },
+      'hobart': { lat: -42.8821, lng: 147.3272 },
+      'darwin': { lat: -12.4634, lng: 130.8456 }
+    };
+
+    const queryLower = query.toLowerCase();
+    for (const [city, coords] of Object.entries(cityCoords)) {
+      if (queryLower.includes(city)) {
+        return coords;
+      }
+    }
+
+    // Default to Sydney if no match
+    return { lat: -33.8688, lng: 151.2093 };
   }
 }
 
