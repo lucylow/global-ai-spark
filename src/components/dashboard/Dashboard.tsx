@@ -15,12 +15,14 @@ import { ReportsPage } from '../reports/ReportsPage';
 import { PricingPage } from '../pricing/PricingPage';
 import { usePropertyAnalysis } from '@/hooks/usePropertyAnalysis';
 import { useSystemHealth } from '@/hooks/useSystemHealth';
+import { useEnhancedPropertySearch } from '@/hooks/useEnhancedPropertySearch';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
 
 export const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const [propertyValuation, setPropertyValuation] = useState<any>(null);
+  const [currentAnalysis, setCurrentAnalysis] = useState<any>(null);
   
   const { 
     isLoading, 
@@ -31,32 +33,37 @@ export const Dashboard: React.FC = () => {
     setDataMode
   } = usePropertyAnalysis();
 
-  const handlePropertyAnalysis = (address: string, propertyData?: any) => {
-    console.log('Analyzing property:', address, propertyData);
-    setSelectedProperty(propertyData || { address });
+  const { analysisData } = useEnhancedPropertySearch();
+
+  const handlePropertyAnalysis = (address: string, analysisResult?: any) => {
+    console.log('Analyzing property:', address, analysisResult);
     
-    // Set mock valuation data for demo
-    if (address.toLowerCase().includes('collins street')) {
-      setPropertyValuation({
-        current_valuation: COLLINS_STREET_MOCK_DATA.propertyAnalysis.current_valuation,
-        confidence: COLLINS_STREET_MOCK_DATA.propertyAnalysis.confidence,
-        risk_score: COLLINS_STREET_MOCK_DATA.propertyAnalysis.risk_score,
-        analysis_result: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result
-      });
+    if (analysisResult) {
+      // Use the enhanced analysis result
+      setSelectedProperty(analysisResult.property || { address });
+      setPropertyValuation(analysisResult.analysis);
+      setCurrentAnalysis(analysisResult);
       
-      // Add risk data to property
-      setSelectedProperty({
-        ...propertyData,
-        address,
-        coordinates: { lat: -37.8136, lng: 144.9631 },
-        riskData: {
-          flood: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result.risk.flood,
-          fire: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result.risk.fire,
-          coastal: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result.risk.coastalErosion
-        }
-      });
+      // Add coordinates and risk data for map display
+      if (analysisResult.property?.coordinates) {
+        setSelectedProperty(prev => ({
+          ...prev,
+          coordinates: analysisResult.property.coordinates,
+          riskData: {
+            flood: analysisResult.analysis?.analysis_result?.risk?.flood || 25,
+            fire: analysisResult.analysis?.analysis_result?.risk?.fire || 30,
+            coastal: analysisResult.analysis?.analysis_result?.risk?.coastalErosion || 10
+          }
+        }));
+      }
+    } else {
+      // Fallback for basic search
+      setSelectedProperty({ address });
+      setPropertyValuation(null);
+      setCurrentAnalysis(null);
     }
     
+    // Trigger the original analysis hook as well for compatibility
     analyzeProperty(address);
   };
   
@@ -80,7 +87,12 @@ export const Dashboard: React.FC = () => {
       case 'dashboard':
         return (
           <>
-            <PropertySearch onAnalyze={handlePropertyAnalysis} isLoading={isLoading} />
+            <PropertySearch 
+              onAnalyze={handlePropertyAnalysis} 
+              isLoading={isLoading}
+              dataMode={dataMode as 'auto' | 'mock' | 'api'}
+              onDataModeChange={(mode) => setDataMode(mode as any)}
+            />
             <DataModeToggle 
               dataMode={dataMode} 
               onModeChange={setDataMode} 
@@ -94,7 +106,12 @@ export const Dashboard: React.FC = () => {
       case 'risk':
         return (
           <div className="space-y-8">
-            <PropertySearch onAnalyze={handlePropertyAnalysis} isLoading={isLoading} />
+            <PropertySearch 
+              onAnalyze={handlePropertyAnalysis} 
+              isLoading={isLoading}
+              dataMode={dataMode as 'auto' | 'mock' | 'api'}
+              onDataModeChange={(mode) => setDataMode(mode as any)}
+            />
             {selectedProperty ? (
               <div className="space-y-8">
                 <PropertyDetails 
@@ -106,10 +123,15 @@ export const Dashboard: React.FC = () => {
                 />
                 <EnhancedRiskAnalysis />
               </div>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Enter a property address above to view comprehensive risk analysis</p>
-              </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Enter a property address above to view comprehensive risk analysis</p>
+                  {currentAnalysis?.dataSource && (
+                    <p className="mt-2 text-sm">
+                      Last search used: <span className="font-medium">{currentAnalysis.dataSource}</span>
+                    </p>
+                  )}
+                </div>
             )}
           </div>
         );

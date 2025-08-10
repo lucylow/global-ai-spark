@@ -3,60 +3,104 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, MapPin, Home, Loader2, Building } from 'lucide-react';
-import { searchProperties, fetchPropertyDetails, type PropertySuggestion } from '@/services/api/domain';
+import { Search, MapPin, Home, Loader2, Building, CheckCircle2 } from 'lucide-react';
+import { useEnhancedPropertySearch } from '@/hooks/useEnhancedPropertySearch';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
 
 interface PropertySearchProps {
-  onAnalyze: (query: string, propertyData?: any) => void;
+  onAnalyze: (query: string, analysisResult?: any) => void;
   isLoading: boolean;
+  dataMode?: 'auto' | 'mock' | 'api';
+  onDataModeChange?: (mode: 'auto' | 'mock' | 'api') => void;
 }
 
-export const PropertySearch: React.FC<PropertySearchProps> = ({ onAnalyze, isLoading }) => {
+export const PropertySearch: React.FC<PropertySearchProps> = ({ 
+  onAnalyze, 
+  isLoading: externalLoading,
+  dataMode = 'auto',
+  onDataModeChange 
+}) => {
   const [query, setQuery] = useState('123 Collins Street, Melbourne VIC');
-  const [suggestions, setSuggestions] = useState<PropertySuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [searching, setSearching] = useState(false);
+
+  const {
+    isLoading: searchLoading,
+    isSearching,
+    searchResults,
+    analysis,
+    error,
+    searchProperties,
+    selectProperty,
+    analyzeProperty,
+    clearResults,
+    setDataMode: setSearchDataMode
+  } = useEnhancedPropertySearch();
+
+  // Update data mode when prop changes
+  useEffect(() => {
+    setSearchDataMode(dataMode);
+  }, [dataMode, setSearchDataMode]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
-      if (query.length > 2 && !query.toLowerCase().includes('collins street')) {
-        setSearching(true);
-        const results = await searchProperties(query);
-        setSuggestions(results);
-        setSearching(false);
+      if (query.length > 2) {
+        await searchProperties(query);
         setShowSuggestions(true);
       } else {
-        setSuggestions([]);
         setShowSuggestions(false);
       }
     }, 300);
 
     return () => clearTimeout(delayDebounce);
-  }, [query]);
+  }, [query, searchProperties]);
 
-  const handleSelectProperty = async (suggestion: PropertySuggestion) => {
-    setQuery(suggestion.address);
+  const handleSelectProperty = async (result: any) => {
+    setQuery(result.address);
     setShowSuggestions(false);
     
-    // Fetch detailed property data
-    const propertyDetails = await fetchPropertyDetails(suggestion.id);
-    onAnalyze(suggestion.address, propertyDetails);
+    try {
+      const analysisResult = await analyzeProperty(result.address);
+      if (analysisResult) {
+        onAnalyze(result.address, analysisResult);
+      }
+    } catch (err) {
+      console.error('Failed to analyze selected property:', err);
+      onAnalyze(result.address);
+    }
   };
 
-  const handleAnalyze = () => {
-    // For demo, use Collins Street mock data if it matches
-    if (query.toLowerCase().includes('collins street')) {
-      onAnalyze(query, COLLINS_STREET_MOCK_DATA);
-    } else {
+  const handleAnalyze = async () => {
+    if (!query.trim()) return;
+
+    try {
+      const analysisResult = await analyzeProperty(query);
+      onAnalyze(query, analysisResult);
+    } catch (err) {
+      console.error('Analysis failed:', err);
       onAnalyze(query);
     }
   };
 
-  const handleDemoClick = () => {
-    setQuery('123 Collins Street, Melbourne VIC 3000');
-    onAnalyze('123 Collins Street, Melbourne VIC 3000', COLLINS_STREET_MOCK_DATA);
+  const handleDemoClick = async () => {
+    const demoAddress = '123 Collins Street, Melbourne VIC 3000';
+    setQuery(demoAddress);
+    
+    // For demo, always use mock data
+    const mockResult = {
+      property: {
+        address: demoAddress,
+        coordinates: { lat: -37.8136, lng: 144.9631 }
+      },
+      analysis: COLLINS_STREET_MOCK_DATA.propertyAnalysis,
+      sentiment: COLLINS_STREET_MOCK_DATA.sentimentAnalysis,
+      marketSentiment: COLLINS_STREET_MOCK_DATA.marketSentiment,
+      dataSource: 'mock_demo'
+    };
+    
+    onAnalyze(demoAddress, mockResult);
   };
+
+  const isProcessing = externalLoading || searchLoading;
 
   return (
     <Card>
@@ -64,10 +108,22 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({ onAnalyze, isLoa
         <CardTitle className="flex items-center space-x-2">
           <Building className="h-5 w-5 text-primary" />
           <span>Property Intelligence Assistant</span>
-          <Badge variant="secondary">Domain AU Powered</Badge>
+          <Badge variant="secondary">Enhanced Search</Badge>
+          {analysis?.dataSource && (
+            <Badge variant="outline" className="text-xs">
+              {analysis.dataSource === 'mock_data' ? 'Demo Mode' : 
+               analysis.dataSource === 'fallback' ? 'Offline Mode' : 'Live Data'}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {error && (
+          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">⚠️ {error}</p>
+          </div>
+        )}
+        
         <div className="relative">
           <div className="flex gap-2">
             <div className="relative flex-1">
@@ -77,14 +133,14 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({ onAnalyze, isLoa
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search any Australian property address..."
                 className="pl-10 pr-10"
-                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                onFocus={() => searchResults.length > 0 && setShowSuggestions(true)}
               />
-              {searching && (
+              {isSearching && (
                 <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
               )}
             </div>
-            <Button onClick={handleAnalyze} disabled={isLoading || !query.trim()}>
-              {isLoading ? (
+            <Button onClick={handleAnalyze} disabled={isProcessing || !query.trim()}>
+              {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Analyzing...
@@ -99,39 +155,39 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({ onAnalyze, isLoa
           </div>
 
           {/* Property Suggestions Dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
+          {showSuggestions && searchResults.length > 0 && (
             <div className="absolute z-50 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {suggestions.map((suggestion, index) => (
+              {searchResults.map((result, index) => (
                 <div
-                  key={suggestion.id || index}
-                  onClick={() => handleSelectProperty(suggestion)}
+                  key={result.id || index}
+                  onClick={() => handleSelectProperty(result)}
                   className="p-3 hover:bg-muted cursor-pointer border-b last:border-b-0 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">{suggestion.address}</span>
+                        <span className="font-medium text-sm">{result.address}</span>
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        {suggestion.suburb} {suggestion.state} {suggestion.postcode}
+                        {result.suburb} {result.state} {result.postcode}
                       </div>
                     </div>
                     <Badge variant="outline" className="ml-2 text-xs">
-                      {suggestion.type}
+                      {result.type}
                     </Badge>
                   </div>
                 </div>
               ))}
               <div className="p-2 bg-muted/50 text-xs text-muted-foreground text-center">
-                Powered by Domain AU API
+                Enhanced Property Search
               </div>
             </div>
           )}
         </div>
 
         {/* Demo Section */}
-        <div className="space-y-3">
+        <div className="space-y-3">{/**/}
           <Button 
             variant="outline" 
             size="sm"
