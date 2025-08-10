@@ -92,7 +92,22 @@ export const Dashboard: React.FC = () => {
           </>
         );
       case 'risk':
-        return <EnhancedRiskAnalysis />;
+        return (
+          <div className="space-y-8">
+            {selectedProperty && (
+              <>
+                <PropertyDetails 
+                  property={selectedProperty} 
+                  valuation={propertyValuation}
+                />
+                <PropertyMap 
+                  property={selectedProperty}
+                />
+              </>
+            )}
+            <EnhancedRiskAnalysis />
+          </div>
+        );
       case 'blockchain':
         return <BlockchainDashboard />;
       case 'compliance':
