@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { CheckoutDialog } from './CheckoutDialog';
 
 export const PricingPage: React.FC = () => {
   const plans = [
@@ -96,13 +97,31 @@ export const PricingPage: React.FC = () => {
                   ))}
                 </ul>
                 
-                <Button 
-                  className={`w-full ${plan.highlighted ? '' : 'variant-outline'}`}
-                  variant={plan.highlighted ? 'default' : 'outline'}
-                >
-                  {plan.name === 'Enterprise' ? 'Contact Sales' : 
-                   plan.name === 'Starter' ? 'Get Started Free' : 'Start Free Trial'}
-                </Button>
+                {plan.name === 'Enterprise' ? (
+                  <Button 
+                    className="w-full"
+                    variant="outline"
+                    onClick={() => window.open('mailto:sales@propguard.ai', '_blank')}
+                  >
+                    Contact Sales
+                  </Button>
+                ) : plan.name === 'Starter' ? (
+                  <Button 
+                    className="w-full"
+                    variant="outline"
+                  >
+                    Get Started Free
+                  </Button>
+                ) : (
+                  <CheckoutDialog
+                    plan={plan}
+                    trigger={
+                      <Button className="w-full">
+                        Start Free Trial
+                      </Button>
+                    }
+                  />
+                )}
               </CardContent>
             </Card>
           ))}
