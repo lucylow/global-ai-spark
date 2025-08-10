@@ -3,12 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { realtyBaseAPI } from '@/services/api/realtybase';
+import { googleMapsAPI } from '@/services/api/maps';
+import { propGuardIntegration } from '@/services/propguard-integration';
 
 export const APITestPanel = () => {
   const [healthStatus, setHealthStatus] = useState<any>(null);
   const [isTestingHealth, setIsTestingHealth] = useState(false);
-  const [searchResults, setSearchResults] = useState<any>(null);
-  const [isTestingSearch, setIsTestingSearch] = useState(false);
+  const [integrationStatus, setIntegrationStatus] = useState<any>(null);
+  const [isTestingIntegration, setIsTestingIntegration] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [isTestingAnalysis, setIsTestingAnalysis] = useState(false);
 
   const testHealthEndpoint = async () => {
     setIsTestingHealth(true);
@@ -21,19 +25,26 @@ export const APITestPanel = () => {
     setIsTestingHealth(false);
   };
 
-  const testPropertySearch = async () => {
-    setIsTestingSearch(true);
+  const testAllIntegrations = async () => {
+    setIsTestingIntegration(true);
     try {
-      const result = await realtyBaseAPI.searchProperties({
-        location: 'Melbourne VIC',
-        property_type: 'for-sale',
-        limit: 5
-      });
-      setSearchResults(result);
+      const result = await propGuardIntegration.testIntegrations();
+      setIntegrationStatus(result);
     } catch (error) {
-      setSearchResults({ error: error.message });
+      setIntegrationStatus({ error: error.message });
     }
-    setIsTestingSearch(false);
+    setIsTestingIntegration(false);
+  };
+
+  const testPropertyAnalysis = async () => {
+    setIsTestingAnalysis(true);
+    try {
+      const result = await propGuardIntegration.analyzeProperty('123 Collins Street, Melbourne VIC');
+      setAnalysisResult(result);
+    } catch (error) {
+      setAnalysisResult({ error: error.message });
+    }
+    setIsTestingAnalysis(false);
   };
 
   return (
@@ -41,11 +52,11 @@ export const APITestPanel = () => {
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <span>🧪</span>
-          <span>RapidAPI Integration Test</span>
+          <span>PropGuard AI Integration Test</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Health Test */}
           <div className="space-y-3">
             <Button 
@@ -53,12 +64,12 @@ export const APITestPanel = () => {
               disabled={isTestingHealth}
               className="w-full"
             >
-              {isTestingHealth ? 'Testing...' : 'Test Health Endpoint'}
+              {isTestingHealth ? 'Testing...' : 'Test Realty Base'}
             </Button>
             
             {healthStatus && (
               <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium mb-2">Health Status:</div>
+                <div className="text-sm font-medium mb-2">Realty Base Status:</div>
                 {healthStatus.error ? (
                   <Badge className="bg-red-100 text-red-800">Error: {healthStatus.error}</Badge>
                 ) : (
@@ -66,7 +77,7 @@ export const APITestPanel = () => {
                     <Badge className="bg-green-100 text-green-800">
                       Status: {healthStatus.status || 'Connected'}
                     </Badge>
-                    <pre className="text-xs bg-white p-2 rounded overflow-auto">
+                    <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-20">
                       {JSON.stringify(healthStatus, null, 2)}
                     </pre>
                   </div>
@@ -75,28 +86,62 @@ export const APITestPanel = () => {
             )}
           </div>
 
-          {/* Search Test */}
+          {/* Integration Test */}
           <div className="space-y-3">
             <Button 
-              onClick={testPropertySearch}
-              disabled={isTestingSearch}
+              onClick={testAllIntegrations}
+              disabled={isTestingIntegration}
               className="w-full"
             >
-              {isTestingSearch ? 'Testing...' : 'Test Property Search'}
+              {isTestingIntegration ? 'Testing...' : 'Test All Integrations'}
             </Button>
             
-            {searchResults && (
+            {integrationStatus && (
               <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium mb-2">Search Results:</div>
-                {searchResults.error ? (
-                  <Badge className="bg-red-100 text-red-800">Error: {searchResults.error}</Badge>
+                <div className="text-sm font-medium mb-2">Integration Status:</div>
+                {integrationStatus.error ? (
+                  <Badge className="bg-red-100 text-red-800">Error: {integrationStatus.error}</Badge>
+                ) : (
+                  <div className="space-y-1">
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Realty: {integrationStatus.realty_base?.status || 'Unknown'}
+                    </Badge>
+                    <Badge className="bg-green-100 text-green-800">
+                      Maps: {integrationStatus.google_maps?.status || 'Unknown'}
+                    </Badge>
+                    <Badge className="bg-purple-100 text-purple-800">
+                      AI: {integrationStatus.propguard_ai?.status || 'Unknown'}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          {/* Property Analysis Test */}
+          <div className="space-y-3">
+            <Button 
+              onClick={testPropertyAnalysis}
+              disabled={isTestingAnalysis}
+              className="w-full"
+            >
+              {isTestingAnalysis ? 'Analyzing...' : 'Test Property Analysis'}
+            </Button>
+            
+            {analysisResult && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="text-sm font-medium mb-2">Analysis Result:</div>
+                {analysisResult.error ? (
+                  <Badge className="bg-red-100 text-red-800">Error: {analysisResult.error}</Badge>
                 ) : (
                   <div className="space-y-1">
                     <Badge className="bg-green-100 text-green-800">
-                      Found: {searchResults.length || 0} properties
+                      Score: {analysisResult.propguard_score || 'N/A'}
                     </Badge>
-                    <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-32">
-                      {JSON.stringify(searchResults, null, 2)}
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Recommendations: {analysisResult.recommendations?.length || 0}
+                    </Badge>
+                    <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-20">
+                      {JSON.stringify(analysisResult, null, 2)}
                     </pre>
                   </div>
                 )}
@@ -106,8 +151,10 @@ export const APITestPanel = () => {
         </div>
 
         <div className="mt-4 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-          <strong>Backend URL:</strong> https://j6h5i7cpl1ye.manus.space<br/>
-          <strong>Note:</strong> Ensure RAPIDAPI_KEY is configured on the backend server
+          <strong>Integration Status:</strong><br/>
+          <strong>Realty Base:</strong> Supabase Edge Function + RapidAPI<br/>
+          <strong>Google Maps:</strong> Supabase Edge Function + Google API<br/>
+          <strong>PropGuard AI:</strong> Manus Backend Integration
         </div>
       </CardContent>
     </Card>
