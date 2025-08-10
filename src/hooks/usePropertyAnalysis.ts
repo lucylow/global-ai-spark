@@ -1,12 +1,6 @@
 import { useState, useCallback } from 'react';
-import { propGuardAPI } from '@/services/api/propguard';
 import { PropertyAnalysis, SentimentAnalysis, MarketSentiment } from '@/types/property';
-import { 
-  isCollinsStreetAddress, 
-  getCollinsStreetPropertyAnalysis, 
-  getCollinsStreetSentiment, 
-  getCollinsStreetMarketSentiment 
-} from '@/data/mockData';
+import { propertyDataService, DataMode } from '@/services/propertyDataService';
 
 export const usePropertyAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,54 +8,46 @@ export const usePropertyAnalysis = () => {
   const [sentiment, setSentiment] = useState<SentimentAnalysis | null>(null);
   const [marketSentiment, setMarketSentiment] = useState<MarketSentiment | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dataMode, setDataMode] = useState<DataMode>('auto');
+  const [dataSource, setDataSource] = useState<string>('');
+  const [apiHealth, setApiHealth] = useState<any>(null);
 
   const analyzeProperty = useCallback(async (query: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Check if this is Collins Street address and use mock data
-      if (isCollinsStreetAddress(query)) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        setAnalysis(getCollinsStreetPropertyAnalysis());
-        setSentiment(getCollinsStreetSentiment());
-        setMarketSentiment(getCollinsStreetMarketSentiment());
-      } else {
-        // Use real API for other addresses
-        const [propertyResult, sentimentResult, marketResult] = await Promise.allSettled([
-          propGuardAPI.analyzeProperty(query),
-          propGuardAPI.getPropertySentiment(query),
-          propGuardAPI.getMarketSentiment({ location: query })
-        ]);
-
-        if (propertyResult.status === 'fulfilled') {
-          setAnalysis(propertyResult.value as PropertyAnalysis);
-        }
-
-        if (sentimentResult.status === 'fulfilled') {
-          const result = sentimentResult.value as any;
-          setSentiment(result.sentiment_analysis);
-        }
-
-        if (marketResult.status === 'fulfilled') {
-          const result = marketResult.value as any;
-          setMarketSentiment(result.market_sentiment);
-        }
-      }
+      propertyDataService.setDataMode(dataMode);
+      const result = await propertyDataService.analyzeProperty(query);
+      
+      setAnalysis(result.analysis);
+      setSentiment(result.sentiment);
+      setMarketSentiment(result.marketSentiment);
+      setDataSource(result.dataSource);
+      setError(result.error);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [dataMode]);
 
   const clearAnalysis = useCallback(() => {
     setAnalysis(null);
     setSentiment(null);
     setMarketSentiment(null);
     setError(null);
+    setDataSource('');
+  }, []);
+
+  const checkAPIHealth = useCallback(async () => {
+    const health = await propertyDataService.checkAPIHealth();
+    setApiHealth(health);
+  }, []);
+
+  const handleDataModeChange = useCallback((mode: DataMode) => {
+    setDataMode(mode);
+    propertyDataService.setDataMode(mode);
   }, []);
 
   return {
@@ -70,7 +56,12 @@ export const usePropertyAnalysis = () => {
     sentiment,
     marketSentiment,
     error,
+    dataMode,
+    dataSource,
+    apiHealth,
     analyzeProperty,
-    clearAnalysis
+    clearAnalysis,
+    checkAPIHealth,
+    setDataMode: handleDataModeChange
   };
 };

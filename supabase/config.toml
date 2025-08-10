@@ -1,1 +1,4 @@
 project_id = "mpbwpixpuonkczxgkjks"
+
+[functions.property-analysis]
+verify_jwt = false

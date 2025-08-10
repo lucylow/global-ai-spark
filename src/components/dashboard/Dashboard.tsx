@@ -7,6 +7,7 @@ import { PropertyAnalytics } from '@/components/PropertyAnalytics';
 import MarketSentiment from '@/components/MarketSentiment';
 import { RiskVisualization } from './RiskVisualization';
 import { SystemHealth } from '@/components/SystemHealth';
+import { DataModeToggle } from '@/components/DataModeToggle';
 import { RiskAnalysisPage } from '../risk/RiskAnalysisPage';
 import { BlockchainPage } from '../blockchain/BlockchainPage';
 import { CompliancePage } from '../compliance/CompliancePage';
@@ -17,14 +18,24 @@ import { useSystemHealth } from '@/hooks/useSystemHealth';
 
 export const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  
   const { 
     isLoading, 
     analysis, 
     sentiment, 
     marketSentiment, 
-    error, 
-    analyzeProperty 
+    error,
+    dataMode,
+    dataSource,
+    apiHealth,
+    analyzeProperty,
+    checkAPIHealth,
+    setDataMode
   } = usePropertyAnalysis();
+  
+  React.useEffect(() => {
+    checkAPIHealth();
+  }, [checkAPIHealth]);
   const { health } = useSystemHealth();
 
   const tabs = [
@@ -42,6 +53,12 @@ export const Dashboard: React.FC = () => {
         return (
           <>
             <PropertySearch onAnalyze={analyzeProperty} isLoading={isLoading} />
+            
+            <DataModeToggle 
+              dataMode={dataMode} 
+              onModeChange={setDataMode} 
+              apiHealth={apiHealth}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
               <div className="lg:col-span-2">
