@@ -261,7 +261,7 @@ https://github.com/lucylow/global-ai-spark/blob/main/src/services/api/xnode.ts
 https://github.com/lucylow/global-ai-spark/blob/main/propguard-ai-backend/src/routes/xnode.py
 https://github.com/lucylow/global-ai-spark/blob/main/propguard-ai-backend/src/routes/xnode_simple.py
 
-"""
+```
 // XNode Distributed Computing API
 import { propGuardAPI } from './propguard';
 
@@ -283,7 +283,7 @@ export class XNodeAPI {
 }
 
 export const xnodeAPI = new XNodeAPI();
-"""
+```
 
 
 **Community-Driven Development:**
