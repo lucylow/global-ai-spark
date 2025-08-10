@@ -125,7 +125,7 @@ export interface ValuationReport {
 }
 
 class RealtyBaseAPI {
-  private baseURL = ENV.API_BASE_URL;
+  private baseURL = 'https://j6h5i7cpl1ye.manus.space';
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}/realty${endpoint}`;
