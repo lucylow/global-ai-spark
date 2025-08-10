@@ -128,23 +128,23 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card shadow-sm border-b border-border">
+      <header className="bg-gradient-to-r from-propguard-blue-dark to-propguard-blue shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">P</span>
+                <div className="w-8 h-8 bg-propguard-orange rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">P</span>
                 </div>
-                <span className="text-xl font-bold text-foreground">PropGuard AI</span>
+                <span className="text-xl font-bold text-white">PropGuard AI</span>
               </div>
             </div>
             
             <div className="flex items-center space-x-4">
-              <Badge variant={health?.propguard?.success ? "default" : "destructive"}>
+              <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
                 APRA CPS 230 Compliant
               </Badge>
-              <Badge variant="secondary">AI-Powered</Badge>
+              <Badge variant="secondary" className="bg-propguard-orange text-white border-propguard-orange">AI-Powered</Badge>
             </div>
           </div>
         </div>
@@ -160,7 +160,7 @@ export const Dashboard: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`py-4 px-3 border-b-2 font-medium text-sm rounded-none transition-colors ${
                   activeTab === tab.id
-                    ? 'border-primary text-primary bg-primary/5'
+                    ? 'border-propguard-orange text-propguard-orange bg-propguard-orange-light'
                     : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground'
                 }`}
               >
