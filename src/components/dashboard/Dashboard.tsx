@@ -24,6 +24,11 @@ export const Dashboard: React.FC = () => {
   
   const { 
     isLoading, 
+    analysis,
+    sentiment,
+    marketSentiment,
+    fireRisk,
+    error,
     dataMode,
     apiHealth,
     analyzeProperty,
@@ -31,22 +36,16 @@ export const Dashboard: React.FC = () => {
     setDataMode
   } = usePropertyAnalysis();
 
-  const handlePropertyAnalysis = (address: string, propertyData?: any) => {
+  const handlePropertyAnalysis = async (address: string, propertyData?: any) => {
     console.log('Analyzing property:', address, propertyData);
-    setSelectedProperty(propertyData || { address });
     
-    // Set mock valuation data for demo
-    if (address.toLowerCase().includes('collins street')) {
-      setPropertyValuation({
-        current_valuation: COLLINS_STREET_MOCK_DATA.propertyAnalysis.current_valuation,
-        confidence: COLLINS_STREET_MOCK_DATA.propertyAnalysis.confidence,
-        risk_score: COLLINS_STREET_MOCK_DATA.propertyAnalysis.risk_score,
-        analysis_result: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result
-      });
-      
-      // Add risk data to property
+    // Always trigger the actual analysis
+    await analyzeProperty(address);
+    
+    // Set property data based on input
+    if (address.toLowerCase().includes('collins street') || propertyData === COLLINS_STREET_MOCK_DATA) {
       setSelectedProperty({
-        ...propertyData,
+        ...COLLINS_STREET_MOCK_DATA.propertyData,
         address,
         coordinates: { lat: -37.8136, lng: 144.9631 },
         riskData: {
@@ -55,9 +54,14 @@ export const Dashboard: React.FC = () => {
           coastal: COLLINS_STREET_MOCK_DATA.propertyAnalysis.analysis_result.risk.coastalErosion
         }
       });
+      setPropertyValuation(COLLINS_STREET_MOCK_DATA.propertyAnalysis);
+    } else {
+      setSelectedProperty(propertyData || { 
+        address,
+        coordinates: { lat: -33.8688, lng: 151.2093 } // Default Sydney coordinates
+      });
+      setPropertyValuation(analysis);
     }
-    
-    analyzeProperty(address);
   };
   
   React.useEffect(() => {
@@ -86,9 +90,22 @@ export const Dashboard: React.FC = () => {
               onModeChange={setDataMode} 
               apiHealth={apiHealth}
             />
-            <div className="mt-8">
-              <EnhancedPropertyAnalytics />
-            </div>
+            {selectedProperty ? (
+              <div className="mt-8 space-y-8">
+                <PropertyDetails 
+                  property={selectedProperty} 
+                  valuation={propertyValuation}
+                />
+                <PropertyMap 
+                  property={selectedProperty}
+                />
+                <EnhancedPropertyAnalytics />
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground mt-8">
+                <p>Enter a property address above to view comprehensive analysis</p>
+              </div>
+            )}
           </>
         );
       case 'risk':
