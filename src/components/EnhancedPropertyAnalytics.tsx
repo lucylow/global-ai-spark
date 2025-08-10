@@ -6,8 +6,22 @@ import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, AlertTriangle, DollarSign, Target, Calendar } from 'lucide-react';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
 
-export const EnhancedPropertyAnalytics = () => {
-  const data = COLLINS_STREET_MOCK_DATA;
+interface EnhancedPropertyAnalyticsProps {
+  property?: any;
+  valuation?: any;
+  analysis?: any;
+}
+
+export const EnhancedPropertyAnalytics: React.FC<EnhancedPropertyAnalyticsProps> = ({
+  property,
+  valuation,
+  analysis
+}) => {
+  // Use dynamic data if available, otherwise fall back to mock data
+  const data = analysis || COLLINS_STREET_MOCK_DATA;
+  const currentValuation = valuation?.current_valuation || data.propertyAnalysis.current_valuation;
+  const confidence = valuation?.confidence || data.propertyAnalysis.confidence;
+  const riskScore = valuation?.risk_score || data.propertyAnalysis.risk_score;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AU', {
@@ -32,20 +46,22 @@ export const EnhancedPropertyAnalytics = () => {
           <div className="grid grid-cols-2 gap-6">
             <div>
               <div className="text-3xl font-bold text-primary">
-                {formatCurrency(data.propertyAnalysis.current_valuation)}
+                {formatCurrency(currentValuation)}
               </div>
-              <div className="text-sm text-muted-foreground">Current Valuation</div>
+              <div className="text-sm text-muted-foreground">
+                Current Valuation {valuation ? '(Live Analysis)' : '(Demo Data)'}
+              </div>
               <div className="mt-2 text-sm">
-                Range: {formatCurrency(data.propertyAnalysis.valuation_range.min)} - {formatCurrency(data.propertyAnalysis.valuation_range.max)}
+                Range: {formatCurrency(currentValuation * 0.9)} - {formatCurrency(currentValuation * 1.1)}
               </div>
             </div>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Confidence Level</span>
-                  <span>{data.propertyAnalysis.confidence}%</span>
+                  <span>{confidence}%</span>
                 </div>
-                <Progress value={data.propertyAnalysis.confidence} className="h-2" />
+                <Progress value={confidence} className="h-2" />
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">

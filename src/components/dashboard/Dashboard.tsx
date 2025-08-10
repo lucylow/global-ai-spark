@@ -99,9 +99,34 @@ export const Dashboard: React.FC = () => {
               onModeChange={setDataMode} 
               apiHealth={apiHealth}
             />
-            <div className="mt-8">
-              <EnhancedPropertyAnalytics />
-            </div>
+            {selectedProperty ? (
+              <div className="mt-8 space-y-6">
+                <PropertyDetails 
+                  property={selectedProperty} 
+                  valuation={propertyValuation}
+                />
+                <PropertyMap 
+                  property={selectedProperty}
+                />
+                <EnhancedPropertyAnalytics 
+                  property={selectedProperty}
+                  valuation={propertyValuation}
+                  analysis={currentAnalysis}
+                />
+              </div>
+            ) : (
+              <div className="mt-8">
+                <div className="text-center py-12 text-muted-foreground bg-muted/30 rounded-lg border-2 border-dashed">
+                  <p className="text-lg font-medium">Search for a property to see detailed analytics</p>
+                  <p className="mt-2">Enter any Australian property address above to get started</p>
+                  {currentAnalysis?.dataSource && (
+                    <p className="mt-2 text-sm">
+                      Last search used: <span className="font-medium">{currentAnalysis.dataSource}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         );
       case 'risk':
