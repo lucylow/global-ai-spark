@@ -11,7 +11,6 @@
 PropGuard AI is an advanced property risk assessment and valuation platform that combines artificial intelligence, blockchain technology, and distributed computing to provide comprehensive property analysis for lenders, investors, and regulatory compliance.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-PropGuard%20AI-blue)](https://propguard-ai-openxai.lovable.app/)
-[![Backend API](https://img.shields.io/badge/API-Manus%20Space-green)](https://9yhyi3c8nkjv.manus.space)
 [![GitHub](https://img.shields.io/badge/GitHub-global--ai--spark-black)](https://github.com/lucylow/global-ai-spark)
 
 ## 🏗️ Technical Architecture
