@@ -94,8 +94,9 @@ export const Dashboard: React.FC = () => {
       case 'risk':
         return (
           <div className="space-y-8">
-            {selectedProperty && (
-              <>
+            <PropertySearch onAnalyze={handlePropertyAnalysis} isLoading={isLoading} />
+            {selectedProperty ? (
+              <div className="space-y-8">
                 <PropertyDetails 
                   property={selectedProperty} 
                   valuation={propertyValuation}
@@ -103,9 +104,13 @@ export const Dashboard: React.FC = () => {
                 <PropertyMap 
                   property={selectedProperty}
                 />
-              </>
+                <EnhancedRiskAnalysis />
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Enter a property address above to view comprehensive risk analysis</p>
+              </div>
             )}
-            <EnhancedRiskAnalysis />
           </div>
         );
       case 'blockchain':
