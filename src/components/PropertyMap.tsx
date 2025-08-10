@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Waves, Flame, Mountain, Navigation, MapPin, Plus, Minus } from 'lucide-react';
+import { Waves, Flame, Mountain, Navigation, MapPin, Plus, Minus, Thermometer, Cloud, Wind, TreePine, Droplets } from 'lucide-react';
 
 interface PropertyMapProps {
   property?: {
@@ -38,8 +38,21 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
 }) => {
   const [zoom, setZoom] = useState(15);
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
+  const [showClimateOverlay, setShowClimateOverlay] = useState(true);
 
   const coordinates = property?.coordinates || { lat: -37.8136, lng: 144.9631 };
+
+  // Mock climate data - in real app this would come from APIs
+  const climateData = {
+    temperature: 24.5,
+    humidity: 68,
+    windSpeed: 12,
+    airQuality: 85,
+    carbonLevel: 415,
+    precipitation: 15,
+    uvIndex: 6,
+    visibility: 10
+  };
 
   const getRiskColor = (score: number) => {
     if (score >= 70) return 'text-red-600 bg-red-100';
@@ -114,6 +127,32 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
         </div>
       </div>
 
+      {/* Climate overlays */}
+      {showClimateOverlay && (
+        <>
+          {/* Temperature zones */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-20 h-20 bg-red-400 opacity-30 rounded-full animate-pulse"></div>
+            <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-orange-400 opacity-25 rounded-full"></div>
+            <div className="absolute bottom-1/3 left-1/3 w-24 h-24 bg-yellow-400 opacity-20 rounded-full"></div>
+          </div>
+
+          {/* Wind patterns */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+            <path d="M50 100 Q 150 50 250 100" stroke="#60a5fa" strokeWidth="2" fill="none" strokeDasharray="5,5">
+              <animateTransform attributeName="transform" type="translate" values="0,0; 10,0; 0,0" dur="3s" repeatCount="indefinite"/>
+            </path>
+            <path d="M100 200 Q 200 150 300 200" stroke="#60a5fa" strokeWidth="2" fill="none" strokeDasharray="5,5">
+              <animateTransform attributeName="transform" type="translate" values="0,0; -8,0; 0,0" dur="4s" repeatCount="indefinite"/>
+            </path>
+          </svg>
+
+          {/* Air quality indicators */}
+          <div className="absolute top-1/6 right-1/6 w-12 h-12 bg-green-500 opacity-30 rounded-full"></div>
+          <div className="absolute bottom-1/4 right-1/3 w-10 h-10 bg-yellow-500 opacity-35 rounded-full"></div>
+        </>
+      )}
+
       {/* Risk overlays */}
       {(property?.riskData || riskData) && (
         <>
@@ -171,10 +210,64 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
               <div className="bg-white rounded-lg shadow-lg border border-gray-200">
                 <button 
                   onClick={() => setMapType(mapType === 'roadmap' ? 'satellite' : 'roadmap')}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-lg text-xs font-medium text-gray-600"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-lg text-xs font-medium text-gray-600 border-b border-gray-200"
                 >
                   {mapType === 'roadmap' ? 'SAT' : 'MAP'}
                 </button>
+                <button 
+                  onClick={() => setShowClimateOverlay(!showClimateOverlay)}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-b-lg"
+                >
+                  <Cloud className={`h-4 w-4 ${showClimateOverlay ? 'text-blue-600' : 'text-gray-400'}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Climate metrics panel */}
+            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-xl border border-gray-200 p-4 max-w-xs">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Cloud className="h-4 w-4 text-blue-500" />
+                Climate Metrics
+              </h3>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <Thermometer className="h-3 w-3 text-red-500" />
+                  <div>
+                    <div className="font-medium">{climateData.temperature}°C</div>
+                    <div className="text-gray-500">Temperature</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Droplets className="h-3 w-3 text-blue-500" />
+                  <div>
+                    <div className="font-medium">{climateData.humidity}%</div>
+                    <div className="text-gray-500">Humidity</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Wind className="h-3 w-3 text-gray-500" />
+                  <div>
+                    <div className="font-medium">{climateData.windSpeed} km/h</div>
+                    <div className="text-gray-500">Wind Speed</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TreePine className="h-3 w-3 text-green-500" />
+                  <div>
+                    <div className="font-medium">{climateData.airQuality}/100</div>
+                    <div className="text-gray-500">Air Quality</div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-500">CO₂ Level:</span>
+                  <span className="font-medium text-orange-600">{climateData.carbonLevel} ppm</span>
+                </div>
+                <div className="flex items-center justify-between text-xs mt-1">
+                  <span className="text-gray-500">UV Index:</span>
+                  <span className="font-medium text-purple-600">{climateData.uvIndex}/10</span>
+                </div>
               </div>
             </div>
 
