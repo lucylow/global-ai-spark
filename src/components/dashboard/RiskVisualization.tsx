@@ -7,7 +7,13 @@ import { Input } from '@/components/ui/input';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
 
 export const RiskVisualization: React.FC = () => {
-  const { riskData, propertyAnalysis } = COLLINS_STREET_MOCK_DATA;
+  const { propertyAnalysis } = COLLINS_STREET_MOCK_DATA;
+  const riskData = {
+    floodRisk: { score: 72, level: 'High', color: 'destructive' as const },
+    fireRisk: { score: 45, level: 'Moderate', color: 'warning' as const },
+    erosionRisk: { score: 38, level: 'Low', color: 'secondary' as const },
+    cyclonesRisk: { score: 10, level: 'Very Low', color: 'secondary' as const }
+  };
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

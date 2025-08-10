@@ -5,7 +5,12 @@ import { Progress } from '@/components/ui/progress';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
 
 export const RiskAnalysisPage: React.FC = () => {
-  const riskData = COLLINS_STREET_MOCK_DATA.riskData;
+  const riskData = {
+    floodRisk: { score: 72, level: 'High', color: 'destructive' as const },
+    fireRisk: { score: 45, level: 'Moderate', color: 'warning' as const },
+    erosionRisk: { score: 38, level: 'Low', color: 'secondary' as const },
+    cyclonesRisk: { score: 10, level: 'Very Low', color: 'secondary' as const }
+  };
   const climateProjections = COLLINS_STREET_MOCK_DATA.climateProjections;
   const riskMitigation = COLLINS_STREET_MOCK_DATA.riskMitigation;
 

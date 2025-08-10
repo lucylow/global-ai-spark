@@ -31,4 +31,10 @@ export interface MarketSentiment {
   trend: 'bullish' | 'bearish' | 'neutral';
   confidence: number;
   summary: string;
+  detailed_metrics?: {
+    cap_rate: number;
+    noi: number;
+    cash_on_cash: number;
+    debt_coverage: number;
+  };
 }

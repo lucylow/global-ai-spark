@@ -44,7 +44,7 @@ export const APRAComplianceDashboard = () => {
     <div className="space-y-6">
       {/* Compliance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Object.entries(data.propertyAnalysis.analysis_result.compliance.detailed).map(([key, compliance]) => (
+        {Object.entries(data.propertyAnalysis.analysis_result.compliance.detailed).map(([key, compliance]: [string, any]) => (
           <Card key={key}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
