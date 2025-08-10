@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NFTMintDialog } from './NFTMintDialog';
 
 export const BlockchainPage: React.FC = () => {
-  const [mintingStatus, setMintingStatus] = useState<'idle' | 'minting' | 'success'>('idle');
   const [verificationInput, setVerificationInput] = useState('');
 
   const mockNFTs = [
@@ -28,13 +28,6 @@ export const BlockchainPage: React.FC = () => {
     }
   ];
 
-  const handleMintNFT = async () => {
-    setMintingStatus('minting');
-    // Simulate minting process
-    setTimeout(() => {
-      setMintingStatus('success');
-    }, 3000);
-  };
 
   return (
     <div className="space-y-6">
@@ -112,34 +105,13 @@ export const BlockchainPage: React.FC = () => {
                 </div>
               </div>
               
-              {mintingStatus === 'idle' && (
-                <Button onClick={handleMintNFT} className="w-full">
-                  Mint Valuation NFT on Polygon
-                </Button>
-              )}
-              
-              {mintingStatus === 'minting' && (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                  <p>Minting NFT... Please wait</p>
-                </div>
-              )}
-              
-              {mintingStatus === 'success' && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="text-green-800">
-                    <h4 className="font-semibold">✓ NFT Minted Successfully!</h4>
-                    <div className="mt-2 space-y-1 text-sm">
-                      <p>Token ID: #1248</p>
-                      <p>Transaction: 0x9b2fade1c0d57a7af66ab4ead79fade...</p>
-                      <p>IPFS: QmX4j8...K3mP</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      View on OpenSea
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <NFTMintDialog 
+                trigger={
+                  <Button className="w-full">
+                    Mint Valuation NFT on Polygon
+                  </Button>
+                }
+              />
             </CardContent>
           </Card>
         </TabsContent>
