@@ -44,19 +44,102 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [zoom, setZoom] = useState(15);
 
-  // Get Mapbox token from Supabase Edge Function
+  // Initialize Mapbox when component mounts
   useEffect(() => {
-    const getMapboxToken = async () => {
+    if (!mapContainer.current) return;
+
+    const initializeMap = async () => {
       try {
-        // For now, use demo mode without real Mapbox
+        // Get Mapbox token from Supabase secrets
+        const response = await fetch('https://mpbwpixpuonkczxgkjks.supabase.co/functions/v1/get-mapbox-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wYndwaXhwdW9ua2N6eGdramtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NzMzMTUsImV4cCI6MjA3MDI0OTMxNX0.fBht4WXv01R_kWwAao_I9RDuBtDm57Xyb2VBaHVaQOc',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wYndwaXhwdW9ua2N6eGdramtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NzMzMTUsImV4cCI6MjA3MDI0OTMxNX0.fBht4WXv01R_kWwAao_I9RDuBtDm57Xyb2VBaHVaQOc'
+          }
+        });
+        const data = await response.json();
+
+        if (data?.token) {
+          mapboxgl.accessToken = data.token;
+          setMapboxToken(data.token);
+
+          // Initialize the map
+          const coordinates = property?.coordinates || { lat: -37.8136, lng: 144.9631 }; // Melbourne CBD default
+          
+          map.current = new mapboxgl.Map({
+            container: mapContainer.current,
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [coordinates.lng, coordinates.lat],
+            zoom: zoom
+          });
+
+          // Add navigation controls
+          map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+          // Add property marker
+          new mapboxgl.Marker({ color: '#ef4444' })
+            .setLngLat([coordinates.lng, coordinates.lat])
+            .setPopup(new mapboxgl.Popup().setHTML(
+              `<div class="p-2">
+                <h3 class="font-semibold">${property?.address || '123 Collins Street'}</h3>
+                <p class="text-sm text-gray-600">Property Location</p>
+              </div>`
+            ))
+            .addTo(map.current);
+
+          // Add risk overlays if data exists
+          if (property?.riskData || riskData) {
+            const currentRiskData = property?.riskData || riskData;
+            
+            // Add flood risk overlay
+            if (currentRiskData.flood && currentRiskData.flood > 30) {
+              map.current.on('load', () => {
+                map.current!.addSource('flood-risk', {
+                  type: 'geojson',
+                  data: {
+                    type: 'Feature',
+                    geometry: {
+                      type: 'Point',
+                      coordinates: [coordinates.lng, coordinates.lat]
+                    },
+                    properties: {}
+                  }
+                });
+                
+                map.current!.addLayer({
+                  id: 'flood-risk-circle',
+                  type: 'circle',
+                  source: 'flood-risk',
+                  paint: {
+                    'circle-radius': currentRiskData.flood! * 2,
+                    'circle-color': '#3b82f6',
+                    'circle-opacity': 0.3,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#1e40af'
+                  }
+                });
+              });
+            }
+          }
+        }
+        
         setIsLoading(false);
       } catch (error) {
-        console.error('Error getting Mapbox token:', error);
+        console.error('Error initializing map:', error);
         setIsLoading(false);
       }
     };
-    getMapboxToken();
-  }, []);
+
+    initializeMap();
+
+    return () => {
+      if (map.current) {
+        map.current.remove();
+      }
+    };
+  }, [property, zoom]);
 
   const getRiskColor = (score: number) => {
     if (score >= 70) return 'text-red-600 bg-red-100';
@@ -123,96 +206,47 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
         </CardHeader>
         <CardContent className="p-0">
           <div className="relative">
-            <div className="w-full h-96 relative bg-gray-200 rounded overflow-hidden">
-              {/* Map background with street-like pattern */}
-              <div 
-                className="w-full h-full bg-gray-100"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(90deg, #e5e7eb 1px, transparent 1px),
-                    linear-gradient(#e5e7eb 1px, transparent 1px),
-                    linear-gradient(90deg, #f3f4f6 1px, transparent 1px),
-                    linear-gradient(#f3f4f6 1px, transparent 1px)
-                  `,
-                  backgroundSize: '60px 60px, 60px 60px, 20px 20px, 20px 20px',
-                  backgroundPosition: '0 0, 0 0, 0 0, 0 0'
-                }}
-              >
-                {/* Property markers */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  {/* Main property marker */}
-                  <div className="relative">
-                    <div className="w-8 h-8 bg-red-600 rounded-full border-4 border-white shadow-lg flex items-center justify-center transform -translate-y-4">
-                      <div className="w-3 h-3 bg-white rounded-full"></div>
-                    </div>
-                    <div className="w-0 h-0 border-l-4 border-r-4 border-t-8 border-l-transparent border-r-transparent border-t-red-600 absolute left-1/2 transform -translate-x-1/2 -translate-y-1"></div>
+            <div 
+              ref={mapContainer}
+              className="w-full h-96 relative bg-gray-200 rounded overflow-hidden"
+              style={{ minHeight: '400px' }}
+            />
+
+            {/* Google Maps-style controls */}
+            <div className="absolute top-4 right-4 flex flex-col space-y-2">
+              {/* Zoom controls */}
+              <div className="bg-white rounded-lg shadow-lg border border-gray-200">
+                <button 
+                  onClick={() => setZoom(Math.min(zoom + 1, 20))}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 border-b border-gray-200 rounded-t-lg"
+                >
+                  <span className="text-lg font-bold text-gray-600">+</span>
+                </button>
+                <button 
+                  onClick={() => setZoom(Math.max(zoom - 1, 1))}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-b-lg"
+                >
+                  <span className="text-lg font-bold text-gray-600">−</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Property info card */}
+            <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-w-xs">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Navigation className="w-6 h-6 text-blue-600" />
                   </div>
                 </div>
-
-                {/* Risk overlays */}
-                {activeRisks.map((risk, index) => (
-                  <div
-                    key={risk.label}
-                    className={`
-                      absolute rounded-full opacity-30 animate-pulse
-                      ${risk.color}
-                    `}
-                    style={{
-                      width: `${risk.value * 3 + 150}px`,
-                      height: `${risk.value * 3 + 150}px`,
-                      top: '50%',
-                      left: '50%',
-                      transform: `translate(-50%, -50%)`,
-                      animationDelay: `${index * 200}ms`
-                    }}
-                  />
-                ))}
-
-                {/* Street names overlay */}
-                <div className="absolute top-20 left-20 text-xs text-gray-600 font-medium bg-white px-2 py-1 rounded shadow">
-                  Collins Street
-                </div>
-                <div className="absolute bottom-20 right-20 text-xs text-gray-600 font-medium bg-white px-2 py-1 rounded shadow">
-                  Bourke Street
-                </div>
-              </div>
-
-              {/* Google Maps-style controls */}
-              <div className="absolute top-4 right-4 flex flex-col space-y-2">
-                {/* Zoom controls */}
-                <div className="bg-white rounded-lg shadow-lg border border-gray-200">
-                  <button 
-                    onClick={() => setZoom(Math.min(zoom + 1, 20))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 border-b border-gray-200 rounded-t-lg"
-                  >
-                    <span className="text-lg font-bold text-gray-600">+</span>
-                  </button>
-                  <button 
-                    onClick={() => setZoom(Math.max(zoom - 1, 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-b-lg"
-                  >
-                    <span className="text-lg font-bold text-gray-600">−</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Property info card */}
-              <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-w-xs">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Navigation className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-900">
-                      {property?.address || '123 Collins Street'}
-                    </h3>
-                    <p className="text-xs text-gray-500">Melbourne VIC 3000</p>
-                    <div className="mt-2 flex items-center space-x-1">
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">4.5★</span>
-                      <span className="text-xs text-gray-500">Property rating</span>
-                    </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-gray-900">
+                    {property?.address || '123 Collins Street'}
+                  </h3>
+                  <p className="text-xs text-gray-500">Melbourne VIC 3000</p>
+                  <div className="mt-2 flex items-center space-x-1">
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">4.5★</span>
+                    <span className="text-xs text-gray-500">Property rating</span>
                   </div>
                 </div>
               </div>
