@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Waves, Flame, Mountain, Navigation } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PropertyMapProps {
   property?: {
@@ -50,16 +51,14 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
 
     const initializeMap = async () => {
       try {
-        // Get Mapbox token from Supabase secrets
-        const response = await fetch('https://mpbwpixpuonkczxgkjks.supabase.co/functions/v1/get-mapbox-token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wYndwaXhwdW9ua2N6eGdramtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NzMzMTUsImV4cCI6MjA3MDI0OTMxNX0.fBht4WXv01R_kWwAao_I9RDuBtDm57Xyb2VBaHVaQOc',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wYndwaXhwdW9ua2N6eGdramtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NzMzMTUsImV4cCI6MjA3MDI0OTMxNX0.fBht4WXv01R_kWwAao_I9RDuBtDm57Xyb2VBaHVaQOc'
-          }
-        });
-        const data = await response.json();
+        // Get Mapbox token from Supabase edge function
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        
+        if (error) {
+          console.error('Error fetching Mapbox token:', error);
+          setIsLoading(false);
+          return;
+        }
 
         if (data?.token) {
           mapboxgl.accessToken = data.token;
