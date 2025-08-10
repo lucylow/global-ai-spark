@@ -35,27 +35,28 @@ export const Dashboard: React.FC = () => {
 
   const { analysisData } = useEnhancedPropertySearch();
 
-  const handlePropertyAnalysis = (address: string, analysisResult?: any) => {
-    console.log('Analyzing property:', address, analysisResult);
+  const handlePropertyAnalysis = async (address: string, analysisResult?: any) => {
+    console.log('Dashboard: Analyzing property:', address, analysisResult);
     
     if (analysisResult) {
       // Use the enhanced analysis result
-      setSelectedProperty(analysisResult.property || { address });
+      const property = {
+        ...analysisResult.property,
+        address: address,
+        coordinates: analysisResult.property?.coordinates || { lat: -37.8136, lng: 144.9631 },
+        riskData: {
+          flood: analysisResult.analysis?.analysis_result?.risk?.flood || 25,
+          fire: analysisResult.analysis?.analysis_result?.risk?.fire || 30,
+          coastal: analysisResult.analysis?.analysis_result?.risk?.coastalErosion || 10
+        }
+      };
+      
+      setSelectedProperty(property);
       setPropertyValuation(analysisResult.analysis);
       setCurrentAnalysis(analysisResult);
       
-      // Add coordinates and risk data for map display
-      if (analysisResult.property?.coordinates) {
-        setSelectedProperty(prev => ({
-          ...prev,
-          coordinates: analysisResult.property.coordinates,
-          riskData: {
-            flood: analysisResult.analysis?.analysis_result?.risk?.flood || 25,
-            fire: analysisResult.analysis?.analysis_result?.risk?.fire || 30,
-            coastal: analysisResult.analysis?.analysis_result?.risk?.coastalErosion || 10
-          }
-        }));
-      }
+      console.log('Dashboard: Updated property:', property);
+      console.log('Dashboard: Updated valuation:', analysisResult.analysis);
     } else {
       // Fallback for basic search
       setSelectedProperty({ address });
