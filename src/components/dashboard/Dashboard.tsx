@@ -72,7 +72,7 @@ export const Dashboard: React.FC = () => {
     { id: 'blockchain', label: 'Blockchain' },
     { id: 'compliance', label: 'APRA Compliance' },
     { id: 'reports', label: 'Reports' },
-    { id: 'pricing', label: '💰 Pricing' }
+    { id: 'pricing', label: 'Pricing' }
   ];
 
   const renderTabContent = () => {
