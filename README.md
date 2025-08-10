@@ -28,7 +28,7 @@ PropGuard AI is an advanced property risk assessment and valuation platform that
 
 ## 🏗️ Technical Architecture
 
-### Frontend Stack (Lovable + React Ecosystem)
+### Frontend Stack 
 - **Framework**: React 18.3.1 + TypeScript 5.6+ + Vite 5.4+
 - **UI Framework**: Shadcn/ui components with Radix UI primitives
 - **Styling**: Tailwind CSS 3.4+ with custom design system tokens
