@@ -68,8 +68,6 @@ export const Dashboard: React.FC = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
-    { id: 'property', label: 'Property Details' },
-    { id: 'map', label: 'Map & Risk' },
     { id: 'risk', label: 'Risk Analysis' },
     { id: 'blockchain', label: 'Blockchain' },
     { id: 'compliance', label: 'APRA Compliance' },
@@ -92,27 +90,6 @@ export const Dashboard: React.FC = () => {
               <EnhancedPropertyAnalytics />
             </div>
           </>
-        );
-      case 'property':
-        return selectedProperty ? (
-          <PropertyDetails 
-            property={selectedProperty} 
-            valuation={propertyValuation}
-          />
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Select a property to view details</p>
-          </div>
-        );
-      case 'map':
-        return selectedProperty ? (
-          <PropertyMap 
-            property={selectedProperty}
-          />
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Select a property to view map and risk analysis</p>
-          </div>
         );
       case 'risk':
         return <EnhancedRiskAnalysis />;
