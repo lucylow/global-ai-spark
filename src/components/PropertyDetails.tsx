@@ -32,12 +32,6 @@ export const PropertyDetails: React.FC<PropertyDetailsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('PropertyDetails - Property:', property);
-    console.log('PropertyDetails - Valuation:', valuation);
-  }, [property, valuation]);
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AU', {
       style: 'currency',
@@ -96,12 +90,7 @@ export const PropertyDetails: React.FC<PropertyDetailsProps> = ({
                 <h1 className="text-2xl font-bold text-foreground mb-2">
                   {property?.address || 'Property Address'}
                 </h1>
-                {property?.price && (
-                  <div className="text-lg font-semibold text-primary mb-1">
-                    {property.price}
-                  </div>
-                )}
-                <div className="flex items-center text-muted-foreground">{/**/}
+                <div className="flex items-center text-muted-foreground">
                   <MapPin className="h-4 w-4 mr-1" />
                   <span className="text-sm">
                     {property?.coordinates ? 
@@ -138,22 +127,22 @@ export const PropertyDetails: React.FC<PropertyDetailsProps> = ({
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <div className="text-2xl font-bold text-primary">
-                        {valuation.current_valuation ? formatCurrency(valuation.current_valuation) : 'Analyzing...'}
+                        {formatCurrency(valuation.current_valuation)}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        PropGuard AI Valuation {valuation.current_valuation ? '✓' : '⏳'}
+                        PropGuard AI Valuation
                       </div>
                     </div>
-                    <Badge variant={getRiskColor(valuation.risk_score || 0)}>
-                      {valuation.risk_score || 0}% Risk
+                    <Badge variant={getRiskColor(valuation.risk_score)}>
+                      {valuation.risk_score}% Risk
                     </Badge>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Confidence Level</span>
-                      <span>{valuation.confidence || 0}%</span>
+                      <span>{valuation.confidence}%</span>
                     </div>
-                    <Progress value={valuation.confidence || 0} className="h-2" />
+                    <Progress value={valuation.confidence} className="h-2" />
                   </div>
                 </div>
               )}
