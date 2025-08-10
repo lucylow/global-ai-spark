@@ -44,86 +44,106 @@ export const EnhancedRiskAnalysis = () => {
   return (
     <div className="space-y-6">
       {/* Risk Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Waves className="h-4 w-4 text-blue-500" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/30">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent"></div>
+          <CardHeader className="pb-3 relative z-10">
+            <CardTitle className="text-sm flex items-center gap-3 text-blue-700 dark:text-blue-300">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <Waves className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
               Flood Risk
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="relative z-10">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold">72</span>
-                <Badge variant="destructive">High</Badge>
+                <span className="text-3xl font-bold text-blue-800 dark:text-blue-200">72</span>
+                <Badge variant="destructive" className="shadow-sm">High</Badge>
               </div>
-              <Progress value={72} className="h-2" />
-              <div className="text-xs text-muted-foreground">
-                800m to Yarra River
+              <div className="space-y-2">
+                <Progress value={72} className="h-3 bg-blue-200/50 dark:bg-blue-800/30" />
+                <div className="text-xs text-blue-600/80 dark:text-blue-400/80 font-medium">
+                  800m to Yarra River
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Flame className="h-4 w-4 text-orange-500" />
+        <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/50 dark:to-orange-900/30">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent"></div>
+          <CardHeader className="pb-3 relative z-10">
+            <CardTitle className="text-sm flex items-center gap-3 text-orange-700 dark:text-orange-300">
+              <div className="p-2 bg-orange-500/20 rounded-lg">
+                <Flame className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+              </div>
               Fire Risk
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="relative z-10">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold">45</span>
-                <Badge variant="secondary">Medium</Badge>
+                <span className="text-3xl font-bold text-orange-800 dark:text-orange-200">45</span>
+                <Badge variant="secondary" className="shadow-sm">Medium</Badge>
               </div>
-              <Progress value={45} className="h-2" />
-              <div className="text-xs text-muted-foreground">
-                4.2km to bushland
+              <div className="space-y-2">
+                <Progress value={45} className="h-3 bg-orange-200/50 dark:bg-orange-800/30" />
+                <div className="text-xs text-orange-600/80 dark:text-orange-400/80 font-medium">
+                  4.2km to bushland
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Mountain className="h-4 w-4 text-green-500" />
+        <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/50 dark:to-emerald-900/30">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent"></div>
+          <CardHeader className="pb-3 relative z-10">
+            <CardTitle className="text-sm flex items-center gap-3 text-emerald-700 dark:text-emerald-300">
+              <div className="p-2 bg-emerald-500/20 rounded-lg">
+                <Mountain className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
               Coastal Risk
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="relative z-10">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold">38</span>
-                <Badge variant="default">Low</Badge>
+                <span className="text-3xl font-bold text-emerald-800 dark:text-emerald-200">38</span>
+                <Badge variant="default" className="shadow-sm bg-emerald-100 text-emerald-800 hover:bg-emerald-200">Low</Badge>
               </div>
-              <Progress value={38} className="h-2" />
-              <div className="text-xs text-muted-foreground">
-                No direct exposure
+              <div className="space-y-2">
+                <Progress value={38} className="h-3 bg-emerald-200/50 dark:bg-emerald-800/30" />
+                <div className="text-xs text-emerald-600/80 dark:text-emerald-400/80 font-medium">
+                  No direct exposure
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Wind className="h-4 w-4 text-purple-500" />
+        <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/50 dark:to-purple-900/30">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent"></div>
+          <CardHeader className="pb-3 relative z-10">
+            <CardTitle className="text-sm flex items-center gap-3 text-purple-700 dark:text-purple-300">
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <Wind className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              </div>
               Cyclone Risk
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="relative z-10">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold">10</span>
-                <Badge variant="default">Very Low</Badge>
+                <span className="text-3xl font-bold text-purple-800 dark:text-purple-200">10</span>
+                <Badge variant="default" className="shadow-sm bg-purple-100 text-purple-800 hover:bg-purple-200">Very Low</Badge>
               </div>
-              <Progress value={10} className="h-2" />
-              <div className="text-xs text-muted-foreground">
-                Southern latitude
+              <div className="space-y-2">
+                <Progress value={10} className="h-3 bg-purple-200/50 dark:bg-purple-800/30" />
+                <div className="text-xs text-purple-600/80 dark:text-purple-400/80 font-medium">
+                  Southern latitude
+                </div>
               </div>
             </div>
           </CardContent>
