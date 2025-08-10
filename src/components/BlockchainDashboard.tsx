@@ -13,6 +13,7 @@ import {
   Eye
 } from 'lucide-react';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
+import { NFTMintDialog } from '@/components/blockchain/NFTMintDialog';
 
 export const BlockchainDashboard = () => {
   const data = COLLINS_STREET_MOCK_DATA;
@@ -169,10 +170,14 @@ export const BlockchainDashboard = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button className="flex items-center gap-2">
-                <Link2 className="h-4 w-4" />
-                Mint NFT Certificate
-              </Button>
+              <NFTMintDialog 
+                trigger={
+                  <Button className="flex items-center gap-2">
+                    <Link2 className="h-4 w-4" />
+                    Mint NFT Certificate
+                  </Button>
+                }
+              />
               <Button variant="outline">
                 Preview Certificate
               </Button>
