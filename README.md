@@ -215,6 +215,21 @@ PropGuard AI represents a revolutionary approach to property risk assessment and
 - **Comprehensive Reporting**: PDF generation with blockchain verification
 - **Dashboard Customization**: Personalized views for different user roles
 
+Report 1 Comprehensive Property Valuation Report
+[https://github.com/lucylow/global-ai-spark/blob/main/reports/Report%201%20Comprehensive%20Property%20Valuation%20Report.pdf
+](https://github.com/lucylow/global-ai-spark/blob/main/reports/Report%201%20Comprehensive%20Property%20Valuation%20Report.pdf)
+
+Report 2 Advanced Climate Risk Assessment
+[https://github.com/lucylow/global-ai-spark/blob/main/reports/Report%202%20Advanced%20Climate%20Risk%20Assessment.pdf
+](https://github.com/lucylow/global-ai-spark/blob/main/reports/Report%202%20Advanced%20Climate%20Risk%20Assessment.pdf)
+
+Report 3 APRA CPS 230 Compliance Audit
+[https://github.com/lucylow/global-ai-spark/blob/main/reports/Report%203%20APRA%20CPS%20230%20Compliance%20Audit.pdf
+](https://github.com/lucylow/global-ai-spark/blob/main/reports/Report%203%20APRA%20CPS%20230%20Compliance%20Audit.pdf)
+
+Report 4 Market Intelligence & Investment Analysis
+[https://github.com/lucylow/global-ai-spark/blob/main/reports/Report%204%20Market%20Intelligence%20%26%20Investment%20Analysis.pdf
+](https://github.com/lucylow/global-ai-spark/blob/main/reports/Report%204%20Market%20Intelligence%20%26%20Investment%20Analysis.pdf)
 **Demo Experience:**
 - Live demo at https://propguard-ai-openxai.lovable.app/
 - Instant property analysis for 123 Collins Street demonstration
