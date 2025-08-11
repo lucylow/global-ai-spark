@@ -87,15 +87,62 @@ class PropertyDataService {
             analysis_result: {
               current_valuation: property.valuation,
               risk_score: property.riskScore,
-              confidence: property.confidence
+              confidence: property.confidence,
+              detailed_breakdown: {
+                land_value: Math.round(property.valuation * 0.6),
+                building_value: Math.round(property.valuation * 0.35),
+                intangible_assets: Math.round(property.valuation * 0.05)
+              },
+              market_comparables: [
+                {
+                  address: `${Math.floor(Math.random() * 200)} Similar Street`,
+                  value: property.valuation * (0.9 + Math.random() * 0.2),
+                  premium: Math.random() * 0.3
+                },
+                {
+                  address: `${Math.floor(Math.random() * 200)} Comparable Ave`,
+                  value: property.valuation * (0.85 + Math.random() * 0.3),
+                  premium: Math.random() * 0.4
+                }
+              ],
+              risk: {
+                detailed: {
+                  flood: {
+                    score: property.risks.flood,
+                    factors: ["Proximity to water bodies", "Historical flood data", "Drainage infrastructure"]
+                  },
+                  fire: {
+                    score: property.risks.fire,
+                    factors: ["Vegetation proximity", "Fire history", "Emergency access"]
+                  },
+                  coastal: {
+                    score: property.risks.coastal,
+                    factors: ["Distance from coast", "Elevation", "Storm surge risk"]
+                  }
+                }
+              }
             }
           },
-          sentiment: { sentiment: Math.random() * 10, risk_level: property.riskScore },
+          sentiment: { 
+            sentiment: Math.random() * 10, 
+            risk_level: property.riskScore 
+          },
           marketSentiment: {
             sentiment_score: Math.random() * 10,
             trend: property.riskScore > 70 ? 'bearish' : 'bullish',
             confidence: property.confidence,
-            summary: `Market analysis for ${property.address}`
+            summary: `Market analysis for ${property.address}`,
+            detailed_metrics: property.marketMetrics.capRate ? {
+              cap_rate: property.marketMetrics.capRate,
+              noi: property.marketMetrics.noi || 0,
+              cash_on_cash: property.marketMetrics.cashOnCash || 0,
+              debt_coverage: property.marketMetrics.dscr || 0
+            } : {
+              cap_rate: 5.2,
+              noi: Math.round(property.valuation * 0.05),
+              cash_on_cash: 7.4,
+              debt_coverage: 1.8
+            }
           },
           fireRisk: {
             riskScore: property.risks.fire / 100,
