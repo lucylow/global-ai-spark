@@ -8,6 +8,7 @@ import {
   getCollinsStreetSentiment, 
   getCollinsStreetMarketSentiment 
 } from '@/data/mockData';
+import { searchProperties } from '@/data/mockProperties';
 
 export type DataMode = 'demo' | 'live' | 'auto';
 
@@ -48,9 +49,9 @@ class PropertyDataService {
   }
 
   async analyzeProperty(query: string): Promise<PropertyDataResult> {
-    // Force demo mode or Collins Street demo
-    if (this.dataMode === 'demo' || isCollinsStreetAddress(query)) {
-      return this.getMockData();
+    // Force demo mode - now supports dynamic property search
+    if (this.dataMode === 'demo') {
+      return this.getMockData(query);
     }
 
     // Live mode - try all APIs with fallbacks
@@ -59,18 +60,59 @@ class PropertyDataService {
         return await this.getLiveData(query);
       } catch (error) {
         console.warn('Live API failed, falling back to mock data:', error);
-        return this.getMockData();
+        return this.getMockData(query);
       }
     }
 
     // Auto mode - use mock data by default to ensure functionality
-    return this.getMockData();
+    return this.getMockData(query);
   }
 
-  private async getMockData(): Promise<PropertyDataResult> {
+  private async getMockData(query?: string): Promise<PropertyDataResult> {
     // Simulate API delay for realism
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    // Use dynamic property search if query provided
+    if (query) {
+      const properties = searchProperties(query);
+      if (properties.length > 0) {
+        const property = properties[0];
+        
+        return {
+          analysis: {
+            current_valuation: property.valuation,
+            valuation_range: property.valuationRange,
+            risk_score: property.riskScore,
+            confidence: property.confidence,
+            analysis_result: {
+              current_valuation: property.valuation,
+              risk_score: property.riskScore,
+              confidence: property.confidence
+            }
+          },
+          sentiment: { sentiment: Math.random() * 10, risk_level: property.riskScore },
+          marketSentiment: {
+            sentiment_score: Math.random() * 10,
+            trend: property.riskScore > 70 ? 'bearish' : 'bullish',
+            confidence: property.confidence,
+            summary: `Market analysis for ${property.address}`
+          },
+          fireRisk: {
+            riskScore: property.risks.fire / 100,
+            riskLevel: property.risks.fire > 70 ? 'High' : 'Moderate',
+            nearbyFires: Math.floor(Math.random() * 5),
+            closestFireDistance: 10 + Math.random() * 40,
+            totalFRP: property.risks.fire + Math.random() * 20,
+            dataSource: 'mock',
+            lastUpdated: new Date().toISOString()
+          },
+          dataSource: 'mock',
+          error: null
+        };
+      }
+    }
+
+    // Fallback to Collins Street
     return {
       analysis: getCollinsStreetPropertyAnalysis(),
       sentiment: getCollinsStreetSentiment(),
