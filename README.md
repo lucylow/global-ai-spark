@@ -1,5 +1,5 @@
 # PropGuard AI - Property Risk Assessment Platform
-
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/1.jpg?raw=true)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
@@ -10,6 +10,9 @@
 
 PropGuard AI is an advanced property risk assessment and valuation platform that combines artificial intelligence, blockchain technology, and distributed computing to provide comprehensive property analysis for lenders, investors, and regulatory compliance.
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/8.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/9.jpg?raw=true)
+
 1. **Regulatory Compliance by Design**: Built specifically for APRA CPS 230 requirements
 2. **Real-time Climate Integration**: Live NASA data for accurate risk assessment
 3. **Blockchain Verification**: Immutable audit trails for complete transparency
@@ -17,17 +20,26 @@ PropGuard AI is an advanced property risk assessment and valuation platform that
 5. **Multi-Modal AI**: Combines property, market, and climate data for comprehensive analysis
 6. **Australian Market Focus**: Deep understanding of local regulations and market conditions
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/5.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/7.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/6.jpg?raw=true)
+
 **Technical Differentiators:**
 - **Sub-second Analysis**: Real-time property valuation and risk assessment
 - **99.9% Uptime**: Distributed architecture ensures high availability
 - **Enterprise Security**: Bank-grade security with end-to-end encryption
 - **Scalable Infrastructure**: Handles millions of property assessments simultaneously
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/12.jpg?raw=true)
+
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-PropGuard%20AI-blue)](https://propguard-ai-openxai.lovable.app/)
 [![GitHub](https://img.shields.io/badge/GitHub-global--ai--spark-black)](https://github.com/lucylow/global-ai-spark)
 
 ## 🏗️ Technical Architecture
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/14.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/15.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/26.jpg?raw=true)
 ### Frontend Stack 
 - **Framework**: React 18.3.1 + TypeScript 5.6+ + Vite 5.4+
 - **UI Framework**: Shadcn/ui components with Radix UI primitives
@@ -65,6 +77,11 @@ PropGuard AI is an advanced property risk assessment and valuation platform that
 - **Payment**: Stripe integration (configured)
 - **Analytics**: Custom metrics dashboard
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/54.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/55.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/56.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/58.jpg?raw=true)
+
 ## 🚀 Features
 
 ### 🤖 AI-Powered Analysis
@@ -72,12 +89,28 @@ PropGuard AI is an advanced property risk assessment and valuation platform that
 - **Risk Scoring**: Climate, market, and financial risk analysis
 - **Sentiment Analysis**: Market sentiment and property sentiment scoring
 - **Predictive Modeling**: Future value and risk projections
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/39.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/34.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/35.jpg?raw=true)
+
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/41.jpg?raw=true)
+
 
 ### ⛓️ Blockchain Integration
 - **Property NFTs**: Immutable property certificates
 - **APRA Compliance**: CPS 230 compliant reporting
 - **Audit Trail**: Transparent transaction history
 - **Smart Contracts**: Automated compliance checking
+
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/49.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/50.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/51.jpg?raw=true)
+
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/52.jpg?raw=true)
+
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/27.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/28.jpg)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/30.jpg?raw=true)
 
 ### 🌐 Distributed Computing (XNode)
 - **Parallel Processing**: Distributed valuation calculations
@@ -98,6 +131,11 @@ PropGuard AI is an advanced property risk assessment and valuation platform that
 
 PropGuard AI represents a revolutionary approach to property risk assessment and mortgage lending, perfectly aligned with OpenxAI's vision of decentralized, community-driven AI infrastructure. Here's how our solution excels across every evaluation criterion:
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/10.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/2.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/19.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/23.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/20.jpg?raw=true)
 ---
 
 ## 🚀 **Innovation: Uniquely Creative & First-of-Its-Kind** (Score: 10/10)
@@ -123,6 +161,7 @@ PropGuard AI represents a revolutionary approach to property risk assessment and
 
 **Robust Technical Architecture:**
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/44.jpg?raw=true)
 **Frontend Excellence:**
 - **React 18.3.1 + TypeScript 5.6+**: Type-safe, modern development stack
 - **Shadcn/UI + Tailwind CSS**: Professional, accessible component library
@@ -136,11 +175,15 @@ PropGuard AI represents a revolutionary approach to property risk assessment and
 - **Edge Functions**: Deno-based serverless computing for optimal performance
 - **Multi-Service Architecture**: Microservices for AI, blockchain, and data processing
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/47.jpg?raw=true)
+
 **AI & ML Integration:**
 - **Multiple LLM Support**: OpenAI GPT-4, Claude Anthropic, and local Ollama models
 - **Distributed Computing**: XNode network for consensus-based valuations
 - **Real-time Data Processing**: Live market data integration and analysis
 - **Advanced Risk Modeling**: Climate change projections and market volatility analysis
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/48.jpg?raw=true)
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/43.jpg?raw=true)
 
 **Code Quality Metrics:**
 - 95%+ TypeScript coverage with strict mode
@@ -244,6 +287,8 @@ PropGuard AI represents a revolutionary approach to property risk assessment and
 ## 🌐 **Decentralized Vision: Perfect OpenxAI Alignment** (Score: 10/10)
 
 **Embodying OpenxAI's Core Principles:**
+
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/57.jpg?raw=true)
 
 **Open & Permissionless:**
 - **Open Source Components**: Core algorithms and models available for community contribution
@@ -1259,6 +1304,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ **Distributed Architecture** - Scalable XNode computing
 - ✅ **Real-time Processing** - Instant property analysis
 
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/59.jpg?raw=true)
 
 ## 🏆 **Conclusion: **
 
@@ -1277,6 +1323,7 @@ PropGuard AI represents the perfect synthesis of innovation, technical excellenc
 **Backend API:** https://j6h5i7cpl1ye.manus.space
 
 ---
+![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/60.jpg?raw=true)
 
 **PropGuard AI** - Revolutionizing property assessment through artificial intelligence, blockchain technology, and distributed computing.
 
