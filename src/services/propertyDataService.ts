@@ -2,6 +2,7 @@ import { PropertyAnalysis, SentimentAnalysis, MarketSentiment } from '@/types/pr
 import { propGuardAPI } from '@/services/api/propguard';
 import { realtyBaseAPI } from '@/services/api/realtybase';
 import { supabase } from '@/integrations/supabase/client';
+import { APP_CONSTANTS } from '@/config/constants';
 import { 
   isCollinsStreetAddress, 
   getCollinsStreetPropertyAnalysis, 
@@ -317,8 +318,11 @@ class PropertyDataService {
   async checkAPIHealth(): Promise<typeof this.apiHealthStatus> {
     try {
       const healthChecks = await Promise.allSettled([
-        propGuardAPI.checkSystemHealth().then(() => true).catch(() => false),
+        // Check PropGuard backend
+        this.checkPropGuardHealth(),
+        // Check RealtyBase API
         realtyBaseAPI.checkHealth().then(() => true).catch(() => false),
+        // Check Supabase Edge Functions
         supabase.functions.invoke('property-analysis', { body: { healthCheck: true } })
           .then(() => true).catch(() => false),
         supabase.functions.invoke('nasa-fire-risk', { body: { latitude: -33.8688, longitude: 151.2093 } })
@@ -342,6 +346,18 @@ class PropertyDataService {
     }
 
     return this.apiHealthStatus;
+  }
+
+  private async checkPropGuardHealth(): Promise<boolean> {
+    try {
+      const response = await fetch(`${APP_CONSTANTS.API_BASE_URL}${APP_CONSTANTS.ENDPOINTS.PROPGUARD.HEALTH}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
   getAPIHealthStatus() {

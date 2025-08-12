@@ -6,6 +6,55 @@ export const APP_CONSTANTS = {
   DEFAULT_TIMEOUT: 10000,
   REFRESH_INTERVAL: 30000,
   
+  // API Configuration
+  API_BASE_URL: 'http://localhost:5000/api',
+  
+  // API Endpoints
+  ENDPOINTS: {
+    // PropGuard main endpoints
+    PROPGUARD: {
+      PROCESS_COMMAND: '/propguard/process-command',
+      MARKET_SENTIMENT: '/propguard/market-sentiment',
+      COMPLIANCE_CHECK: '/propguard/compliance-check',
+      HEALTH: '/propguard/health'
+    },
+    
+    // AI Features endpoints
+    AI: {
+      ENHANCED_ANALYSIS: '/ai/enhanced-analysis',
+      SENTIMENT_ANALYSIS: '/ai/market-sentiment-analysis',
+      RISK_SIMULATION: '/ai/risk-simulation',
+      FINANCIAL_IMPACT: '/ai/financial-impact-assessment'
+    },
+    
+    // Blockchain endpoints
+    BLOCKCHAIN: {
+      MINT_NFT: '/blockchain/mint-valuation-nft',
+      VERIFY_NFT: '/blockchain/verify-nft',
+      COLLECTION: '/blockchain/nft-collection',
+      APRA_REPORT: '/blockchain/apra-compliance-report',
+      HEALTH: '/blockchain/blockchain-health'
+    },
+    
+    // XNode endpoints
+    XNODE: {
+      SIMPLE_ANALYSIS: '/xnode/simple-analysis',
+      NETWORK_STATUS: '/xnode/network-status'
+    },
+    
+    // Data Pipeline endpoints
+    PIPELINE: {
+      DATA_SYNC: '/pipeline/sync-data',
+      STATUS: '/pipeline/status'
+    },
+    
+    // LLM endpoints
+    LLM: {
+      PROPERTY_ANALYSIS: '/llm/property-analysis',
+      RISK_ASSESSMENT: '/llm/risk-assessment'
+    }
+  },
+  
   // Risk thresholds
   RISK_THRESHOLDS: {
     LOW: 0.3,
