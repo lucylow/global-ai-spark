@@ -121,31 +121,7 @@ export const PropertyDetails: React.FC<PropertyDetailsProps> = ({
                 </div>
               </div>
 
-              {/* Valuation Summary */}
-              {valuation && (
-                <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <div className="text-2xl font-bold text-primary">
-                        {formatCurrency(valuation.current_valuation)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        PropGuard AI Valuation
-                      </div>
-                    </div>
-                    <Badge variant={getRiskColor(valuation.risk_score)}>
-                      {valuation.risk_score}% Risk
-                    </Badge>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Confidence Level</span>
-                      <span>{valuation.confidence}%</span>
-                    </div>
-                    <Progress value={valuation.confidence} className="h-2" />
-                  </div>
-                </div>
-              )}
+              {/* Valuation Summary - Removed */}
             </div>
           </div>
         </CardContent>
