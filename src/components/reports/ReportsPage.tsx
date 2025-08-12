@@ -292,6 +292,28 @@ PropGuard AI • APRA CPS 230 Compliant • ASIC Regulatory Technology Provider 
     URL.revokeObjectURL(url);
   };
 
+  const generateCombinedReport = () => {
+    const combinedContent = [
+      reportContents['Full Property Valuation'],
+      '\n\n' + '='.repeat(80) + '\n\n',
+      reportContents['Risk Assessment Only'],
+      '\n\n' + '='.repeat(80) + '\n\n',
+      reportContents['APRA Compliance Report'],
+      '\n\n' + '='.repeat(80) + '\n\n',
+      reportContents['Market Analysis']
+    ].join('');
+
+    const blob = new Blob([combinedContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Complete_Property_Report_123_Collins_Street.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const reports = [
     {
       id: 'VR-2024-001',
@@ -410,7 +432,7 @@ PropGuard AI • APRA CPS 230 Compliant • ASIC Regulatory Technology Provider 
                 </div>
               </div>
 
-              <Button className="w-full">Generate Report</Button>
+              <Button className="w-full" onClick={generateCombinedReport}>Generate Report</Button>
             </CardContent>
           </Card>
 
