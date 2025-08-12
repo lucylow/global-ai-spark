@@ -4,10 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ValuationReport from '../ValuationReport';
 
 export const ReportsPage: React.FC = () => {
   const [selectedProperty, setSelectedProperty] = useState('123 Collins Street');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogContent, setDialogContent] = useState('');
+  const [dialogTitle, setDialogTitle] = useState('');
 
   const reportContents = {
     'Full Property Valuation': `Report 1: Comprehensive Property Valuation Report
@@ -314,6 +318,32 @@ PropGuard AI • APRA CPS 230 Compliant • ASIC Regulatory Technology Provider 
     URL.revokeObjectURL(url);
   };
 
+  const getRandomReport = () => {
+    const reportKeys = Object.keys(reportContents);
+    const randomKey = reportKeys[Math.floor(Math.random() * reportKeys.length)];
+    return { name: randomKey, content: reportContents[randomKey as keyof typeof reportContents] };
+  };
+
+  const viewRandomReport = () => {
+    const randomReport = getRandomReport();
+    setDialogTitle(randomReport.name);
+    setDialogContent(randomReport.content);
+    setIsDialogOpen(true);
+  };
+
+  const downloadRandomReport = () => {
+    const randomReport = getRandomReport();
+    const blob = new Blob([randomReport.content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${randomReport.name.replace(/\s+/g, '_')}_123_Collins_Street.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const reports = [
     {
       id: 'VR-2024-001',
@@ -386,8 +416,8 @@ PropGuard AI • APRA CPS 230 Compliant • ASIC Regulatory Technology Provider 
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">View</Button>
-                      <Button variant="outline" size="sm">Download</Button>
+                      <Button variant="outline" size="sm" onClick={viewRandomReport}>View</Button>
+                      <Button variant="outline" size="sm" onClick={downloadRandomReport}>Download</Button>
                     </div>
                   </div>
                 ))}
@@ -536,6 +566,15 @@ PropGuard AI • APRA CPS 230 Compliant • ASIC Regulatory Technology Provider 
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="whitespace-pre-wrap text-sm">{dialogContent}</div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
