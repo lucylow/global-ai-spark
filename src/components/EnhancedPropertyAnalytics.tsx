@@ -25,7 +25,13 @@ export const EnhancedPropertyAnalytics: React.FC<EnhancedPropertyAnalyticsProps>
     propertyAnalysis: analysis,
     sentimentAnalysis: sentiment || COLLINS_STREET_MOCK_DATA.sentimentAnalysis,
     marketSentiment: marketSentiment || COLLINS_STREET_MOCK_DATA.marketSentiment,
-    confidenceGrowth: COLLINS_STREET_MOCK_DATA.confidenceGrowth
+    // Use dynamic valuation for confidence growth
+    confidenceGrowth: [
+      { date: '2023-01', confidence: 82, valuation: Math.round(analysis.current_valuation * 0.92) },
+      { date: '2023-06', confidence: 85, valuation: Math.round(analysis.current_valuation * 0.95) },
+      { date: '2023-12', confidence: 88, valuation: Math.round(analysis.current_valuation * 0.98) },
+      { date: '2024-01', confidence: analysis.confidence, valuation: analysis.current_valuation }
+    ]
   } : COLLINS_STREET_MOCK_DATA;
 
   const formatCurrency = (amount: number) => {

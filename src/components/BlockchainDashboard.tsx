@@ -14,8 +14,13 @@ import {
 } from 'lucide-react';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
 import { NFTMintDialog } from '@/components/blockchain/NFTMintDialog';
+import { PropertyAnalysis } from '@/types/property';
 
-export const BlockchainDashboard = () => {
+interface BlockchainDashboardProps {
+  analysis?: PropertyAnalysis | null;
+}
+
+export const BlockchainDashboard: React.FC<BlockchainDashboardProps> = ({ analysis }) => {
   const data = COLLINS_STREET_MOCK_DATA;
 
   const formatDate = (dateString: string) => {
@@ -135,7 +140,12 @@ export const BlockchainDashboard = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>Valuation:</span>
-                    <span className="font-medium">$8,500,000 AUD</span>
+                    <span className="font-medium">
+                      {analysis?.current_valuation 
+                        ? `$${(analysis.current_valuation).toLocaleString('en-AU')} AUD`
+                        : '$8,500,000 AUD'
+                      }
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Confidence:</span>

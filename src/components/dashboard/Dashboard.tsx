@@ -135,8 +135,8 @@ export const Dashboard: React.FC = () => {
             )}
           </div>
         );
-      case 'blockchain':
-        return <BlockchainDashboard />;
+        case 'blockchain':
+          return <BlockchainDashboard analysis={analysis} />;
       case 'compliance':
         return <APRAComplianceDashboard />;
       case 'reports':
