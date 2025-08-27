@@ -6,12 +6,23 @@ export const APP_CONSTANTS = {
   DEFAULT_TIMEOUT: 10000,
   REFRESH_INTERVAL: 30000,
   
-  // API Configuration
-  API_BASE_URL: 'http://localhost:5000/api',
+  // API Configuration - Using Supabase Edge Functions
+  API_BASE_URL: 'https://mpbwpixpuonkczxgkjks.supabase.co/functions/v1',
   
   // API Endpoints
   ENDPOINTS: {
-    // PropGuard main endpoints
+    // Supabase Edge Functions
+    SUPABASE: {
+      PROPERTY_ANALYSIS: '/property-analysis',
+      ENHANCED_ANALYSIS: '/enhanced-property-analysis',
+      MARKET_INTELLIGENCE: '/market-intelligence',
+      BLOCKCHAIN_VALUATION: '/blockchain-valuation',
+      NASA_FIRE_RISK: '/nasa-fire-risk',
+      DOMAIN_SEARCH: '/domain-au-search',
+      MAPBOX_TOKEN: '/get-mapbox-token'
+    },
+    
+    // PropGuard main endpoints (fallback)
     PROPGUARD: {
       PROCESS_COMMAND: '/propguard/process-command',
       MARKET_SENTIMENT: '/propguard/market-sentiment',

@@ -33,7 +33,7 @@ export interface PropertyDataResult {
 }
 
 class PropertyDataService {
-  private dataMode: DataMode = 'demo';
+  private dataMode: DataMode = 'live';
   private apiHealthStatus = {
     propguard: false,
     realtybase: false,
@@ -213,9 +213,14 @@ class PropertyDataService {
       // Get property coordinates (mock for now, should be extracted from query)
       const coords = this.extractCoordinates(query);
       
-      // Call property analysis
-      const { data: analysisData, error: analysisError } = await supabase.functions.invoke('property-analysis', {
-        body: { query }
+      // Call enhanced property analysis
+      const { data: analysisData, error: analysisError } = await supabase.functions.invoke('enhanced-property-analysis', {
+        body: { 
+          address: query, 
+          location: query,
+          analysisType: 'comprehensive',
+          coordinates: coords
+        }
       });
 
       if (analysisError) throw analysisError;
@@ -238,10 +243,84 @@ class PropertyDataService {
         console.warn('Fire risk analysis failed:', fireErr);
       }
 
+      // Call market intelligence
+      let marketIntelligence = null;
+      try {
+        const { data: marketData, error: marketError } = await supabase.functions.invoke('market-intelligence', {
+          body: {
+            location: query,
+            propertyType: 'residential',
+            analysisDepth: 'comprehensive'
+          }
+        });
+
+        if (!marketError && marketData?.market_intelligence) {
+          marketIntelligence = marketData.market_intelligence;
+        }
+      } catch (marketErr) {
+        console.warn('Market intelligence failed:', marketErr);
+      }
+
+      // Transform the comprehensive analysis data
+      const analysis = analysisData.analysis;
+      
       return {
-        analysis: analysisData.analysis,
-        sentiment: analysisData.sentiment,
-        marketSentiment: analysisData.marketSentiment,
+        analysis: {
+          current_valuation: analysis.property_analysis.estimated_value,
+          valuation_range: analysis.property_analysis.valuation_range,
+          risk_score: analysis.risk_assessment.overall_risk_score * 100,
+          confidence: analysis.property_analysis.confidence_score,
+          analysis_result: {
+            current_valuation: analysis.property_analysis.estimated_value,
+            risk_score: analysis.risk_assessment.overall_risk_score * 100,
+            confidence: analysis.property_analysis.confidence_score,
+            detailed_breakdown: {
+              land_value: Math.round(analysis.property_analysis.estimated_value * 0.6),
+              building_value: Math.round(analysis.property_analysis.estimated_value * 0.35),
+              intangible_assets: Math.round(analysis.property_analysis.estimated_value * 0.05)
+            },
+            market_comparables: [
+              {
+                address: "Comparable Property 1",
+                value: analysis.property_analysis.estimated_value * 0.95,
+                premium: 0.05
+              }
+            ],
+            risk: {
+              detailed: {
+                flood: {
+                  score: analysis.risk_assessment.climate_risks.flood.score * 100,
+                  factors: analysis.risk_assessment.climate_risks.flood.factors
+                },
+                fire: {
+                  score: analysis.risk_assessment.climate_risks.fire.score * 100,
+                  factors: analysis.risk_assessment.climate_risks.fire.factors
+                },
+                coastal: {
+                  score: analysis.risk_assessment.climate_risks.coastal.score * 100,
+                  factors: analysis.risk_assessment.climate_risks.coastal.factors
+                }
+              }
+            },
+            compliance: analysis.compliance_analysis
+          }
+        },
+        sentiment: { 
+          sentiment: analysis.market_sentiment.sentiment_score, 
+          risk_level: analysis.risk_assessment.overall_risk_score * 100
+        },
+        marketSentiment: {
+          sentiment_score: analysis.market_sentiment.sentiment_score,
+          trend: analysis.market_sentiment.trend,
+          confidence: analysis.market_sentiment.confidence,
+          summary: analysis.market_sentiment.summary,
+          detailed_metrics: analysis.financial_metrics ? {
+            cap_rate: analysis.financial_metrics.cap_rate,
+            noi: analysis.financial_metrics.cash_flow_projection?.[0] || 0,
+            cash_on_cash: analysis.financial_metrics.roi_analysis.annual_return,
+            debt_coverage: analysis.financial_metrics.debt_serviceability.dscr
+          } : undefined
+        },
         fireRisk,
         dataSource: 'supabase',
         error: null
