@@ -16,6 +16,7 @@ import { PricingPage } from '../pricing/PricingPage';
 import { usePropertyAnalysis } from '@/hooks/usePropertyAnalysis';
 import { useSystemHealth } from '@/hooks/useSystemHealth';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
+import { WalletConnection } from '@/components/WalletConnection';
 
 export const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -167,6 +168,7 @@ export const Dashboard: React.FC = () => {
                 APRA CPS 230 Compliant
               </Badge>
               <Badge variant="secondary" className="bg-propguard-orange text-white border-propguard-orange">AI-Powered</Badge>
+              <WalletConnection />
             </div>
           </div>
         </div>
