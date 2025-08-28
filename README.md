@@ -1,4 +1,7 @@
 # PropGuard AI - Property Risk Assessment Platform
+
+Read the whitepaper here: https://drive.google.com/file/d/1XymU2a37rgZ__e8wpmPP-jIDtwtgFWTP/view?usp=sharing
+
 ![](https://github.com/lucylow/global-ai-spark/blob/main/PropGuard%20AI%20%20OpenxAI/1.jpg?raw=true)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
