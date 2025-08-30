@@ -13,6 +13,9 @@ import { APRAComplianceDashboard } from '@/components/APRAComplianceDashboard';
 import { BlockchainDashboard } from '@/components/BlockchainDashboard';
 import { ReportsPage } from '../reports/ReportsPage';
 import { PricingPage } from '../pricing/PricingPage';
+import { AIAssistant } from '@/components/AIAssistant';
+import { AIPredictiveAnalytics } from '@/components/AIPredictiveAnalytics';
+import { AIInsights } from '@/components/AIInsights';
 import { usePropertyAnalysis } from '@/hooks/usePropertyAnalysis';
 import { useSystemHealth } from '@/hooks/useSystemHealth';
 import { COLLINS_STREET_MOCK_DATA } from '@/data/mockData';
@@ -73,6 +76,7 @@ export const Dashboard: React.FC = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
+    { id: 'ai-insights', label: 'AI Insights' },
     { id: 'risk', label: 'Risk Analysis' },
     { id: 'blockchain', label: 'Blockchain' },
     { id: 'compliance', label: 'APRA Compliance' },
@@ -100,12 +104,22 @@ export const Dashboard: React.FC = () => {
                 <PropertyMap 
                   property={selectedProperty}
                 />
-                <EnhancedPropertyAnalytics 
-                  analysis={analysis || propertyValuation}
-                  sentiment={sentiment}
-                  marketSentiment={marketSentiment}
-                  property={selectedProperty}
-                />
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                  <div className="xl:col-span-2">
+                    <EnhancedPropertyAnalytics 
+                      analysis={analysis || propertyValuation}
+                      sentiment={sentiment}
+                      marketSentiment={marketSentiment}
+                      property={selectedProperty}
+                    />
+                  </div>
+                  <div>
+                    <AIAssistant 
+                      property={selectedProperty}
+                      analysis={analysis || propertyValuation}
+                    />
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground mt-8">
@@ -113,6 +127,37 @@ export const Dashboard: React.FC = () => {
               </div>
             )}
           </>
+        );
+      case 'ai-insights':
+        return (
+          <div className="space-y-8">
+            <PropertySearch onAnalyze={handlePropertyAnalysis} isLoading={isLoading} />
+            {selectedProperty ? (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <div className="xl:col-span-2 space-y-8">
+                  <AIInsights 
+                    property={selectedProperty}
+                    analysis={analysis || propertyValuation}
+                    marketData={marketSentiment}
+                  />
+                  <AIPredictiveAnalytics 
+                    property={selectedProperty}
+                    analysis={analysis || propertyValuation}
+                  />
+                </div>
+                <div>
+                  <AIAssistant 
+                    property={selectedProperty}
+                    analysis={analysis || propertyValuation}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Enter a property address above to view AI-powered insights and predictions</p>
+              </div>
+            )}
+          </div>
         );
       case 'risk':
         return (
