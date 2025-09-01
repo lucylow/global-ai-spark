@@ -46,7 +46,7 @@ const LandingPage = () => {
             <div>
               <div className="flex items-center mb-4">
                 <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                  🚀 OpenxAI Hackathon Winner
+                  🚀 OpenxAI Hackathon Submission
                 </span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
