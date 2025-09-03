@@ -6,7 +6,7 @@ import { PropertySearch } from './PropertySearch';
 import { PropertyDetails } from '@/components/PropertyDetails';
 import PropertyMap from '@/components/PropertyMap';
 import { SystemHealth } from '@/components/SystemHealth';
-import { DataModeToggle } from '@/components/DataModeToggle';
+
 import { EnhancedPropertyAnalytics } from '@/components/EnhancedPropertyAnalytics';
 import { EnhancedRiskAnalysis } from '@/components/EnhancedRiskAnalysis';
 import { APRAComplianceDashboard } from '@/components/APRAComplianceDashboard';
@@ -90,11 +90,6 @@ export const Dashboard: React.FC = () => {
         return (
           <>
             <PropertySearch onAnalyze={handlePropertyAnalysis} isLoading={isLoading} />
-            <DataModeToggle 
-              dataMode={dataMode} 
-              onModeChange={setDataMode} 
-              apiHealth={apiHealth}
-            />
             {selectedProperty ? (
               <div className="mt-8 space-y-8">
                 <PropertyDetails 
